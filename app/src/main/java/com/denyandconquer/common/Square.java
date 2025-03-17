@@ -1,21 +1,31 @@
 package com.denyandconquer.common;
 
+import org.apache.commons.lang3.ObjectUtils.Null;
+
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 
 public class Square {
-    private Point2D position;
-    private Player owner; // who colored in this square.
+    private Point2D position; // location in board
+    private Player currentPlayerColor; // who colored in this square.
     private Color color;
     private Boolean isLocked;
     private Integer filledPixels;
-    private Integer SQUARE_SIZE;
 
     public Square(Point2D inputPosition) {
-        position = inputPosition;
+        this.position = inputPosition;
+        this.currentPlayerColor = null;
+        this.color = Color.rgb(255, 255, 255);
+        this.isLocked = false;
+        this.filledPixels = 0;
+
     }
 
     public boolean isWhite() {
+        Color white = Color.rgb(255, 255, 255);
+        if (color.equals(white)) {
+            return true;
+        }
 
         return false;
     }
