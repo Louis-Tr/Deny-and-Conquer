@@ -1,62 +1,47 @@
 package com.denyandconquer.screens;
 
+import com.denyandconquer.global_state.LoadingManager;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import com.denyandconquer.controllers.CreateServerController;
 import com.denyandconquer.controllers.JoinServerController;
 
-/**
- * The InputScene class provides scenes for user inputs to create or join a server.
- * It encapsulates the UI elements and ties them to their respective controllers.
- * Additionally, it adds a "Back" button to allow navigation to the previous scene.
- */
 public class InputScene {
 
     /**
      * Creates and returns a Scene for creating a new server.
-     * <p>
-     * This scene includes input fields for the server name, server IP, and port,
-     * a button that triggers the create server logic in the CreateServerController,
-     * and a "Back" button to return to the previous scene.
-     * </p>
-     *
-     * @param onBack a Runnable callback that is executed when the "Back" button is clicked.
-     *               This should handle the navigation to the previous scene.
-     * @return a Scene for creating a server with the specified input fields and back navigation.
+     * Ensures all inputs are valid before proceeding.
      */
-    public Scene getCreateServerScene(Runnable onBack) {
+    public Scene getCreateServerScene(Runnable onBack, Runnable toLoading) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(10);
         grid.setVgap(10);
 
-        // Server Name Input
         Label nameLabel = new Label("Server Name:");
         TextField nameField = new TextField();
         grid.add(nameLabel, 0, 0);
         grid.add(nameField, 1, 0);
 
-        // Server IP Input
         Label ipLabel = new Label("Server IP:");
         TextField ipField = new TextField();
         grid.add(ipLabel, 0, 1);
         grid.add(ipField, 1, 1);
 
-        // Port Input
         Label portLabel = new Label("Port:");
         TextField portField = new TextField();
         grid.add(portLabel, 0, 2);
         grid.add(portField, 1, 2);
 
-        // Create Server Button
+        Label errorLabel = new Label();
+        errorLabel.setStyle("-fx-text-fill: red;");
+        grid.add(errorLabel, 1, 4);
+
         Button createButton = new Button("Create Server");
         grid.add(createButton, 1, 3);
 
-        // Back Button
         Button backButton = new Button("Back");
         grid.add(backButton, 0, 3);
         backButton.setOnAction(e -> {
@@ -65,54 +50,51 @@ public class InputScene {
             }
         });
 
-        // Create a controller instance, passing in the controls
         CreateServerController controller = new CreateServerController(nameField, ipField, portField);
-        createButton.setOnAction(controller::handleCreateServer);
+
+        createButton.setOnAction(e -> {
+            if (isValidInput(nameField, ipField, portField, errorLabel)) {
+                LoadingManager.setLoading(true);
+                toLoading.run(); // Navigate to loading screen
+                controller.handleCreateServer(e);
+            }
+        });
 
         return new Scene(grid, 400, 300);
     }
 
     /**
      * Creates and returns a Scene for joining an existing server.
-     * <p>
-     * This scene includes input fields for the username, server IP, and port,
-     * a button that triggers the join server logic in the JoinServerController,
-     * and a "Back" button to return to the previous scene.
-     * </p>
-     *
-     * @param onBack a Runnable callback that is executed when the "Back" button is clicked.
-     *               This should handle the navigation to the previous scene.
-     * @return a Scene for joining a server with the specified input fields and back navigation.
+     * Ensures all inputs are valid before proceeding.
      */
-    public Scene getJoinServerScene(Runnable onBack) {
+    public Scene getJoinServerScene(Runnable onBack, Runnable toLoading) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(10);
         grid.setVgap(10);
 
-        // Username Input
         Label usernameLabel = new Label("Username:");
         TextField usernameField = new TextField();
         grid.add(usernameLabel, 0, 0);
         grid.add(usernameField, 1, 0);
 
-        // Server IP Input
         Label ipLabel = new Label("Server IP:");
         TextField ipField = new TextField();
         grid.add(ipLabel, 0, 1);
         grid.add(ipField, 1, 1);
 
-        // Port Input
         Label portLabel = new Label("Port:");
         TextField portField = new TextField();
         grid.add(portLabel, 0, 2);
         grid.add(portField, 1, 2);
 
-        // Join Server Button
+        Label errorLabel = new Label();
+        errorLabel.setStyle("-fx-text-fill: red;");
+        grid.add(errorLabel, 1, 4);
+
         Button joinButton = new Button("Join Server");
         grid.add(joinButton, 1, 3);
 
-        // Back Button
         Button backButton = new Button("Back");
         grid.add(backButton, 0, 3);
         backButton.setOnAction(e -> {
@@ -121,10 +103,49 @@ public class InputScene {
             }
         });
 
-        // Create the controller and set the event handler
         JoinServerController controller = new JoinServerController(usernameField, ipField, portField);
-        joinButton.setOnAction(controller::handleJoinServer);
+
+        joinButton.setOnAction(e -> {
+            if (isValidInput(usernameField, ipField, portField, errorLabel)) {
+                LoadingManager.setLoading(true);
+                toLoading.run(); // Navigate to loading screen
+                controller.handleJoinServer(e);
+            }
+        });
 
         return new Scene(grid, 400, 300);
+    }
+
+    /**
+     * Validates input fields and displays an error message if validation fails.
+     */
+    private boolean isValidInput(TextField nameOrUserField, TextField ipField, TextField portField, Label errorLabel) {
+        String nameOrUser = nameOrUserField.getText().trim();
+        String ip = ipField.getText().trim();
+        String port = portField.getText().trim();
+
+        if (nameOrUser.isEmpty() || ip.isEmpty() || port.isEmpty()) {
+            errorLabel.setText("All fields must be filled.");
+            return false;
+        }
+
+        if (!ip.matches("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$")) {
+            errorLabel.setText("Invalid IP format.");
+            return false;
+        }
+
+        if (!port.matches("\\d+")) {
+            errorLabel.setText("Port must be a number.");
+            return false;
+        }
+
+        int portNumber = Integer.parseInt(port);
+        if (portNumber < 1 || portNumber > 65535) {
+            errorLabel.setText("Port must be between 1 and 65535.");
+            return false;
+        }
+
+        errorLabel.setText(""); // Clear error message if all validations pass
+        return true;
     }
 }
