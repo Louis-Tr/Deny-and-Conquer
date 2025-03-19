@@ -4,73 +4,54 @@ import java.io.*;
 import java.net.Socket;
 
 public class GameClient {
-    public static void main(String[] args) throws Exception {
+    private String playerInfo;
+    private Socket socket;
+    private BufferedReader br;
+    private PrintWriter pw;
+    private BufferedReader input;
+    public void startClient(String serverAddress, int portNumber) {
 
-//        if (args.length != 1) {
-//            System.out.println("Usage: java GameClient 'nickname'");
-//            return;
-//        }
-//        String name = args[0];
+        System.out.println("Connecting to " + serverAddress + " on port " + portNumber);
 
-        int portNumber;
-        try(BufferedReader reader = new BufferedReader(new FileReader("ports.txt"))) {
-            portNumber = Integer.parseInt(reader.readLine());
-        }
-        System.out.println("Connecting to " + portNumber);
-
-        Socket socket = new Socket("localhost", portNumber);
-
-        BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        PrintWriter pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-
-        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-
-        // 닉네임 전송
-        pw.println("mickey17");
-        pw.flush();
-
-        // 백그라운드로 서버가 보내준 메시지를 읽어들여서 화면에 출력한다.
-        InputThread inputThread = new InputThread(br);
-        inputThread.start();
-
-        // 클라이언트는 읽어들인 메시지를 서버에게 전송한다.
         try {
-            String line = null;
-            while((line = input.readLine()) != null) {
+            socket = new Socket(serverAddress, portNumber);
+            br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
+            input = new BufferedReader(new InputStreamReader(System.in));
 
-                // 종료
-                if ("/quit".equals(line)){
-                    pw.println("/quit");
-                    pw.flush();
+            playerInfo = br.readLine();
+            System.out.println("You are " + playerInfo);
+
+            // Thread to receive messages from the server
+            InputThread inputThread = new InputThread(br);
+            inputThread.start();
+
+            // Send message to server
+            String line = null;
+            while ((line = input.readLine()) != null) {
+
+                // End connection
+                if ("quit".equals(line)) {
+                    pw.println("quit");
                     break;
                 }
-                // 전송
+                // Send message
                 pw.println(line);
-                pw.flush();
             }
-        } catch (Exception ex) {
-            System.out.println("...");
-        }
+        } catch (IOException e) {
+            System.out.println("Connection error");
+        } finally {
 
-        try {
-            br.close();
-        }catch (Exception ex) {
-            System.out.println("111");
+            try {
+                input.close();
+                br.close();
+                pw.close();
+                socket.close();
+            } catch (Exception ex) {
+                System.out.println("Closing resources error");
+            }
         }
-
-        try {
-            pw.close();
-        }catch (Exception ex) {
-            System.out.println("222");
-        }
-
-        // 연결 종료
-        try {
-            socket.close();
-            System.out.println("socket close!!");
-        }catch (Exception ex) {
-            System.out.println("333");
-        }
+        System.out.println(playerInfo + " has disconnected.");
     }
 }
 

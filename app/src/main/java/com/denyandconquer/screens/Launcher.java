@@ -1,11 +1,17 @@
 package com.denyandconquer.screens;
 
+import com.denyandconquer.server.GameClient;
+import com.denyandconquer.server.GameServer;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * Launcher is the main entry point for the Deny and Conquer application.
@@ -44,14 +50,28 @@ public class Launcher extends Application {
         // Set actions for each button using the InputScene class and its callback.
         createServerBtn.setOnAction(e -> {
             System.out.println("Create Server clicked!");
-            Scene createServerScene = new InputScene().getCreateServerScene(() -> primaryStage.setScene(launcherScene));
-            primaryStage.setScene(createServerScene);
+
+            // Create and start the server in a new thread
+            GameServer server = new GameServer();
+            new Thread(server::startServer).start();
+
+//            Scene createServerScene = new InputScene().getCreateServerScene(() -> primaryStage.setScene(launcherScene));
+//            primaryStage.setScene(createServerScene);
         });
 
         joinServerBtn.setOnAction(e -> {
             System.out.println("Join Server clicked!");
-            Scene joinServerScene = new InputScene().getJoinServerScene(() -> primaryStage.setScene(launcherScene));
-            primaryStage.setScene(joinServerScene);
+
+            // Find the port number and start new GameClient
+            int portNumber = findPortNumber();
+            if (portNumber != -1) {
+                // Start new GameClient
+                GameClient client = new GameClient();
+                client.startClient("localhost", portNumber);
+            }
+
+//            Scene joinServerScene = new InputScene().getJoinServerScene(() -> primaryStage.setScene(launcherScene));
+//            primaryStage.setScene(joinServerScene);
         });
 
         // Arrange the buttons in a vertical layout
@@ -63,5 +83,18 @@ public class Launcher extends Application {
         launcherScene = new Scene(layout, 400, 300);
         primaryStage.setScene(launcherScene);
         primaryStage.show();
+    }
+
+    private int findPortNumber() {
+        int portNumber = -1;
+
+        // Read the port number from file
+        try (BufferedReader reader = new BufferedReader(new FileReader("ports.txt"))) {
+            portNumber = Integer.parseInt(reader.readLine());
+        } catch (IOException ex) {
+            System.out.println("Reading port number error");
+        }
+
+        return portNumber;
     }
 }
