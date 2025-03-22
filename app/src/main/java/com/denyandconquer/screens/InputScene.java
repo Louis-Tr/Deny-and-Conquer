@@ -3,6 +3,7 @@ package com.denyandconquer.screens;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -15,6 +16,7 @@ import com.denyandconquer.controllers.JoinServerController;
  * Additionally, it adds a "Back" button to allow navigation to the previous scene.
  */
 public class InputScene {
+    Label titleLabel;
 
     /**
      * Creates and returns a Scene for creating a new server.
@@ -124,6 +126,41 @@ public class InputScene {
         // Create the controller and set the event handler
         JoinServerController controller = new JoinServerController(usernameField, ipField, portField);
         joinButton.setOnAction(controller::handleJoinServer);
+
+        return new Scene(grid, 400, 300);
+    }
+
+    public Scene getCreateRoomScene(Runnable onBack) {
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(20));
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        // Player number Input
+        Label nameLabel = new Label("Number of Players");
+        ChoiceBox<Integer> playerChoiceBox = new ChoiceBox<>();
+        playerChoiceBox.getItems().addAll(2, 3, 4);
+        playerChoiceBox.setValue(2);
+
+        grid.add(nameLabel, 0, 0);
+        grid.add(playerChoiceBox, 1, 0);
+
+        // Create room Button
+        Button createButton = new Button("Create Room");
+        grid.add(createButton, 1, 3);
+        /** To do
+         *  From client-side, send create room request to server
+         */
+
+        // Back Button
+        Button backButton = new Button("Back");
+        grid.add(backButton, 0, 3);
+        backButton.setOnAction(e -> {
+            if (onBack != null) {
+                onBack.run();
+            }
+        });
+
 
         return new Scene(grid, 400, 300);
     }
