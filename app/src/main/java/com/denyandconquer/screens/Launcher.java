@@ -23,6 +23,7 @@ public class Launcher extends Application {
 
     // Store the launcher scene so it can be reused in callbacks.
     private Scene launcherScene;
+    private GameServer server;
 
     /**
      * Main method that launches the JavaFX application.
@@ -51,8 +52,12 @@ public class Launcher extends Application {
         createServerBtn.setOnAction(e -> {
 
             // Create and start the server in a new thread
-            GameServer server = new GameServer();
-            new Thread(server::startServer).start();
+            if (server == null) {
+                server = new GameServer();
+                new Thread(server::startServer).start();
+            } else {
+                System.out.println("Server is already running.");
+            }
 
 //            Scene createServerScene = new InputScene().getCreateServerScene(() -> primaryStage.setScene(launcherScene));
 //            primaryStage.setScene(createServerScene);
@@ -74,6 +79,14 @@ public class Launcher extends Application {
 
 //            Scene joinServerScene = new InputScene().getJoinServerScene(() -> primaryStage.setScene(launcherScene));
 //            primaryStage.setScene(joinServerScene);
+        });
+
+        // Close server when closing window
+        primaryStage.setOnCloseRequest(e -> {
+            if (server != null) {
+                System.out.println("Shutting down server...");
+                server.stopServer();
+            }
         });
 
         // Arrange the buttons in a vertical layout
