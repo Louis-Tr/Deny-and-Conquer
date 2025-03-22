@@ -1,5 +1,6 @@
 package com.denyandconquer.server;
 
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
@@ -10,15 +11,19 @@ public class GameServer {
     private static final int MAX_PLAYERS = 4;
     private ServerSocket serverSocket;
     private List<GameThread> list = Collections.synchronizedList(new ArrayList<>());
-    private int assignedPort;
+    private InetAddress host;
+    private int port;
     public void startServer() {
         try {
             serverSocket = new ServerSocket(0); // either fixed or dynamic
-            assignedPort = serverSocket.getLocalPort();
-            System.out.println("Server started at port " + assignedPort);
+            host = InetAddress.getLocalHost();
+            port = serverSocket.getLocalPort();
+            System.out.println("Server started at:");
+            System.out.println("Address: " + host.getHostAddress());
+            System.out.println("Port: " + port);
 
             try (PrintWriter writer = new PrintWriter(new FileWriter("ports.txt"))) {
-                writer.println(assignedPort);
+                writer.println(port);
             }
 
             while (list.size() < MAX_PLAYERS) {

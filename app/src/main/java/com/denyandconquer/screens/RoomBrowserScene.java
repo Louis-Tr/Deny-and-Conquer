@@ -7,6 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -17,7 +18,7 @@ public class RoomBrowserScene {
     private static ObjectOutputStream out;
     private static ObjectInputStream in;
 
-    public Scene getRoomBrowserScene (Runnable onBack) {
+    public Scene getRoomBrowserScene (Stage primaryStage, Runnable onBack) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(10);
@@ -25,12 +26,12 @@ public class RoomBrowserScene {
 
         // Label Title, create refresh button, back button
         Label titleLabel = new Label("Available Game Rooms");
-        Button refreshButton = new Button("Refresh Rooms");
+        Button createRoomBtn = new Button("Create Room");
         Button backButton = new Button("Back");
 
         grid.add(titleLabel, 0, 0, 2, 1);
-        grid.add(refreshButton, 2, 0);
         grid.add(roomListView, 0,1, 3, 2);
+        grid.add(createRoomBtn, 3, 1);
         grid.add(backButton, 0, 4);
 
         // Actions
@@ -49,6 +50,13 @@ public class RoomBrowserScene {
 //        });
 //
 //        requestRoomList(serverAddress, port);
+
+        createRoomBtn.setOnAction(e -> {
+            System.out.println("Create Room clicked!");
+
+            Scene createRoomScene = new InputScene().getCreateRoomScene(() -> primaryStage.setScene(getRoomBrowserScene(primaryStage, onBack)));
+            primaryStage.setScene(createRoomScene);
+        });
 
         backButton.setOnAction(e -> {
             if (onBack != null) {

@@ -44,26 +44,23 @@ public class Launcher extends Application {
         primaryStage.setTitle("Deny and Conquer Launcher");
 
         // Create buttons for options
-//        Button createServerBtn = new Button("Create Server");
-//        Button joinServerBtn = new Button("Join Server");
-        Button createRoomBtn = new Button("Create Room");
-        Button joinGameBtn = new Button("Join Game");
+        Button createServerBtn = new Button("Create Server");
+        Button playBtn = new Button("Play");
 
-//        // Set actions for each button using the InputScene class and its callback.
-//        createServerBtn.setOnAction(e -> {
-//            System.out.println("Create Server clicked!");
-//
-//            // Create and start the server in a new thread
-//            GameServer server = new GameServer();
-//            new Thread(server::startServer).start();
-//
-////            Scene createServerScene = new InputScene().getCreateServerScene(() -> primaryStage.setScene(launcherScene));
-////            primaryStage.setScene(createServerScene);
-//        });
-//
-//        joinServerBtn.setOnAction(e -> {
-//            System.out.println("Join Server clicked!");
-//
+        // Set actions for each button using the InputScene class and its callback.
+        createServerBtn.setOnAction(e -> {
+
+            // Create and start the server in a new thread
+            GameServer server = new GameServer();
+            new Thread(server::startServer).start();
+
+//            Scene createServerScene = new InputScene().getCreateServerScene(() -> primaryStage.setScene(launcherScene));
+//            primaryStage.setScene(createServerScene);
+        });
+
+        playBtn.setOnAction(e -> {
+            System.out.println("Join Server clicked!");
+
 //            // Find the port number and start new GameClient
 //            int portNumber = findPortNumber();
 //            if (portNumber != -1) {
@@ -71,34 +68,18 @@ public class Launcher extends Application {
 //                GameClient client = new GameClient();
 //                client.startClient("localhost", portNumber);
 //            }
-//
-////            Scene joinServerScene = new InputScene().getJoinServerScene(() -> primaryStage.setScene(launcherScene));
-////            primaryStage.setScene(joinServerScene);
-//        });
 
-        createRoomBtn.setOnAction(e -> {
-            System.out.println("Create Room clicked!");
-
-            Scene createRoomScene = new InputScene().getCreateRoomScene(() -> primaryStage.setScene(launcherScene));
-            primaryStage.setScene(createRoomScene);
-        });
-
-        joinGameBtn.setOnAction(e -> {
-            System.out.println("Join Game clicked!");
-
-            /** To-do
-            * Show list of Game rooms
-             */
-
-            Scene roomBrowserScene = new RoomBrowserScene().getRoomBrowserScene(() -> primaryStage.setScene(launcherScene));
+            Scene roomBrowserScene = new RoomBrowserScene().getRoomBrowserScene(primaryStage, () -> primaryStage.setScene(launcherScene));
             primaryStage.setScene(roomBrowserScene);
+
+//            Scene joinServerScene = new InputScene().getJoinServerScene(() -> primaryStage.setScene(launcherScene));
+//            primaryStage.setScene(joinServerScene);
         });
 
         // Arrange the buttons in a vertical layout
         VBox layout = new VBox(20); // 20 pixels of spacing
         layout.setAlignment(Pos.CENTER);
-//        layout.getChildren().addAll(createServerBtn, joinServerBtn);
-        layout.getChildren().addAll(createRoomBtn, joinGameBtn);
+        layout.getChildren().addAll(createServerBtn, playBtn);
         // Create the launcher scene and set it on the primary stage
         launcherScene = new Scene(layout, 400, 300);
         primaryStage.setScene(launcherScene);
