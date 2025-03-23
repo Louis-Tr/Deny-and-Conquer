@@ -136,18 +136,24 @@ public class InputScene {
         grid.setHgap(10);
         grid.setVgap(10);
 
+        // Server IP Input
+        Label nameLabel = new Label("Room Name: ");
+        TextField nameField = new TextField();
+        grid.add(nameLabel,0,0);
+        grid.add(nameField, 0, 1);
+
         // Player number Input
-        Label nameLabel = new Label("Number of Players");
+        Label numberLabel = new Label("Number of Players");
         ChoiceBox<Integer> playerChoiceBox = new ChoiceBox<>();
         playerChoiceBox.getItems().addAll(2, 3, 4);
         playerChoiceBox.setValue(2);
 
-        grid.add(nameLabel, 0, 0);
-        grid.add(playerChoiceBox, 1, 0);
+        grid.add(numberLabel, 1, 0);
+        grid.add(playerChoiceBox, 2, 0);
 
         // Create room Button
         Button createButton = new Button("Create Room");
-        grid.add(createButton, 1, 3);
+        grid.add(createButton, 2, 3);
         /** To do
          *  From client-side, send create room request to server
          */
@@ -160,7 +166,6 @@ public class InputScene {
                 onBack.run();
             }
         });
-
 
         return new Scene(grid, 400, 300);
     }

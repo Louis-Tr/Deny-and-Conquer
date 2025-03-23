@@ -8,12 +8,16 @@ import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.FileWriter;
 public class GameServer {
-    private static final int MAX_PLAYERS = 4;
     private ServerSocket serverSocket;
-    private List<GameThread> list = Collections.synchronizedList(new ArrayList<>());
+    private List<GameThread> playerList = Collections.synchronizedList(new ArrayList<>());
+    private RoomManager roomManager;
     private InetAddress host;
     private int port;
     private boolean running = false;
+    public GameServer() {
+        this.roomManager = new RoomManager();
+        this.playerList = Collections.synchronizedList(new ArrayList<>());
+    }
     public void startServer() {
         try {
             serverSocket = new ServerSocket(0); // either fixed or dynamic
@@ -31,7 +35,7 @@ public class GameServer {
             while (running) {
                 try {
                     Socket socket = serverSocket.accept(); // incoming sockets
-                    GameThread gameThread = new GameThread(socket, list);
+                    GameThread gameThread = new GameThread(socket, playerList, roomManager);
                     gameThread.start();
                 } catch (IOException e) {
                     if (running) {

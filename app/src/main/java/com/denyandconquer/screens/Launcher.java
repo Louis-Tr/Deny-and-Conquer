@@ -64,18 +64,14 @@ public class Launcher extends Application {
         });
 
         playBtn.setOnAction(e -> {
-            System.out.println("Join Server clicked!");
+            System.out.println("Play button clicked!");
 
-//            // Find the port number and start new GameClient
-//            int portNumber = findPortNumber();
-//            if (portNumber != -1) {
-//                // Start new GameClient
-//                GameClient client = new GameClient();
-//                client.startClient("localhost", portNumber);
-//            }
-
-            Scene roomBrowserScene = new RoomBrowserScene().getRoomBrowserScene(primaryStage, () -> primaryStage.setScene(launcherScene));
-            primaryStage.setScene(roomBrowserScene);
+            // Find the port number and start new GameClient
+            int portNumber = findPortNumber();
+            if (portNumber != -1) {
+                // Start new GameClient
+                GameClient client = new GameClient("localhost", portNumber, primaryStage);
+            }
 
 //            Scene joinServerScene = new InputScene().getJoinServerScene(() -> primaryStage.setScene(launcherScene));
 //            primaryStage.setScene(joinServerScene);

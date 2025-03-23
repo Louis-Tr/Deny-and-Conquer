@@ -1,75 +1,116 @@
 package com.denyandconquer.server;
 
+import com.denyandconquer.screens.ListViewScene;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import javafx.application.Platform;
 import java.io.*;
 import java.net.Socket;
 
-public class GameClient {
-    private String playerInfo;
+public class GameClient extends Thread {
+    private Player player;
     private Socket socket;
-    private BufferedReader br;
-    private PrintWriter pw;
-    private BufferedReader input;
-    public void startClient(String serverAddress, int portNumber) {
+    private ObjectOutputStream out;
+    private ObjectInputStream in;
+    private Stage stage;
+    private Scene prevScene;
 
-        System.out.println("Connecting to " + serverAddress + " on port " + portNumber);
+    public GameClient(String serverAddress, int port, Stage primaryStage) {
 
         try {
-            socket = new Socket(serverAddress, portNumber);
-            br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
-            input = new BufferedReader(new InputStreamReader(System.in));
-
-            playerInfo = br.readLine();
-            System.out.println("You are " + playerInfo);
-
-            // Thread to receive messages from the server
-            InputThread inputThread = new InputThread(br);
-            inputThread.start();
-
-            // Send message to server
-            String line = null;
-            while ((line = input.readLine()) != null) {
-
-                // End connection
-                if ("quit".equals(line)) {
-                    pw.println("quit");
-                    break;
-                }
-                // Send message
-                pw.println(line);
-            }
-        } catch (IOException e) {
-            System.out.println("Connection error");
-        } finally {
-
+            this.stage = primaryStage;
+            this.prevScene = primaryStage.getScene();
+            this.socket = new Socket(serverAddress, port);
+            this.out = new ObjectOutputStream(socket.getOutputStream());
+            out.flush();
+            this.in = new ObjectInputStream(socket.getInputStream());
             try {
-                input.close();
-                br.close();
-                pw.close();
-                socket.close();
-            } catch (Exception ex) {
-                System.out.println("Closing resources error");
+                this.player = (Player) in.readObject();
+            } catch (Exception e){
+                e.printStackTrace();
             }
-        }
-        System.out.println(playerInfo + " has disconnected.");
-    }
-}
+            Scene roomBrowserScene = new ListViewScene(primaryStage).getRoomBrowserScene(() -> primaryStage.setScene(prevScene));
+            primaryStage.setScene(roomBrowserScene);
 
-class InputThread extends Thread {
-    BufferedReader br;
-    public InputThread(BufferedReader br) {
-        this.br = br;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void run() {
-        try {
-            String line = null;
-            while((line = br.readLine()) != null) {
-                System.out.println(line);
+            try {
+                Object message;
+                while ((message = in.readObject()) != null) {
+                    if (message instanceof String) {
+                        handleTextMessage((String) message);
+                    } else if (message instanceof Message) {
+                        handleGameMessage((Message) message);
+                    }
+                }
+            } catch (IOException | ClassNotFoundException e) {
+                System.out.println("Connection error: " + e.getMessage());
+            } finally {
+                cleanup();
             }
-        } catch (Exception ex) {
-            System.out.println("...");
+    }
+
+    private void handleTextMessage(String message) {
+        System.out.println(message);
+    }
+
+    private void handleGameMessage(Message message) {
+        switch (message.getType()) {
+            case CREATE_ROOM:
+                System.out.println("Room created" + message.getData());
+                break;
+            case JOIN_ROOM:
+                System.out.println("Room joined" + message.getData());
+                break;
+            case LEAVE_ROOM:
+                System.out.println("Left the room");
+                break;
+            case START_GAME:
+                System.out.println("Game started");
+                break;
+            default:
+                System.out.println("Unknown message");
+                break;
+        }
+        // handle UI ex room update
+    }
+
+    public void send(Object obj) {
+        try {
+            out.writeObject(obj);
+            out.flush();
+        } catch (IOException e) {
+            System.out.println("Connection error: " + e.getMessage());
+        }
+    }
+    public void createRoom(String roomName, int maxPlayers) {
+        Message msg = new Message(Message.Type.CREATE_ROOM, roomName, player, maxPlayers);
+        send(msg);
+    }
+    public void joinRoom(int roomId) {
+        Message msg = new Message(Message.Type.JOIN_ROOM, roomId, player);
+        send(msg);
+    }
+    public void leaveRoom(){
+        Message msg = new Message(Message.Type.LEAVE_ROOM, null, player);
+        send(msg);
+    }
+    public void startGame() {
+        Message msg = new Message(Message.Type.START_GAME, null, player);
+        send(msg);
+    }
+    private void cleanup() {
+        try {
+            if (in != null) in.close();
+            if (out != null) out.close();
+            if (socket != null) socket.close();
+        } catch (IOException e) {
+            System.out.println("Cleanup error for " + player.getName() + ": " + e.getMessage());
         }
     }
 }

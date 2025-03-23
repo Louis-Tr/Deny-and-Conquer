@@ -6,40 +6,42 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Objects;
 
-public class RoomBrowserScene {
-    private static ListView<String> roomListView = new ListView<>();
+public class ListViewScene {
+    private static ListView<String> listView = new ListView<>();
+    Stage primaryStage;
+    GridPane grid;
+    Label titleLabel;
     private static ObjectOutputStream out;
     private static ObjectInputStream in;
 
-    public Scene getRoomBrowserScene (Stage primaryStage, Runnable onBack) {
-        GridPane grid = new GridPane();
+    public ListViewScene(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+        grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(10);
         grid.setVgap(10);
+    }
+    public Scene getRoomBrowserScene (Runnable onBack) {
 
         // Label Title, create refresh button, back button
-        Label titleLabel = new Label("Available Game Rooms");
+        titleLabel = new Label("Available Game Rooms");
         Button createRoomBtn = new Button("Create Room");
         Button backButton = new Button("Back");
 
         grid.add(titleLabel, 0, 0, 2, 1);
-        grid.add(roomListView, 0,1, 3, 2);
+        grid.add(listView, 0,1, 3, 2);
         grid.add(createRoomBtn, 3, 1);
         grid.add(backButton, 0, 4);
 
         // Actions
         /** To do
-         * Refresh Action -> update room list and reload
          * Selected Room -> Enter the room
          * */
-//        refreshButton.setOnAction(e -> requestRoomList(serverAddress, port));
 
         // Set up room selection
 //        roomListView.setOnMouseClicked(e -> {
@@ -54,7 +56,7 @@ public class RoomBrowserScene {
         createRoomBtn.setOnAction(e -> {
             System.out.println("Create Room clicked!");
 
-            Scene createRoomScene = new InputScene().getCreateRoomScene(() -> primaryStage.setScene(getRoomBrowserScene(primaryStage, onBack)));
+            Scene createRoomScene = new InputScene().getCreateRoomScene(() -> primaryStage.setScene(getRoomBrowserScene(onBack)));
             primaryStage.setScene(createRoomScene);
         });
 
@@ -74,4 +76,33 @@ public class RoomBrowserScene {
 //            tr
 //        }).start();
 //    }
+
+    public Scene getRoomScene() {
+        // Label Title, create refresh button, back button
+        titleLabel = new Label("Game Rooms");
+        Button startGameBtn = new Button("Start Game");
+        Button leaveRoomButton = new Button("Leave Room");
+
+        grid.add(titleLabel, 0, 0, 2, 1);
+        grid.add(listView, 0,1, 3, 2);
+        grid.add(startGameBtn, 3, 1);
+        grid.add(leaveRoomButton, 0, 4);
+
+        startGameBtn.setOnAction(e -> {
+            System.out.println("Start Game clicked!");
+
+//            Scene gameBoardScene;
+//            primaryStage.setScene(gameBoardScene);
+        });
+
+        leaveRoomButton.setOnAction(e -> {
+            System.out.println("Leave Room clicked!");
+//            Scene roomBrowserScene = getRoomBrowserScene(onBack);
+//            primaryStage.setScene(roomBrowserScene);
+        });
+
+        Scene scene = new Scene(grid, 400, 300);
+
+        return scene;
+    }
 }
