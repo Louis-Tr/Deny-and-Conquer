@@ -4,21 +4,16 @@ package com.denyandconquer.common;
 import javafx.scene.paint.Color;
 
 public class Player {
-    private String name;
     private Color color;
-    private Integer coloredSquareCount; // score
+    private Integer score;  
     private Boolean isDrawing;
-
-    public String getName() {
-        return name;
-    }
 
     public Color getColor() {
         return color;
     }
 
-    public Integer getColoredSquareCount() {
-        return coloredSquareCount;
+    public Integer getScore() {
+        return score;
     }
 
     public Boolean getIsDrawing() {
@@ -29,14 +24,25 @@ public class Player {
         this.isDrawing = isDrawing;
     }
 
-    public Player(String name, Color color) {
-        this.name = name;
+    public Player() {
+        this.color = null;
+        this.score = 0;
+        this.isDrawing = false;
+    }
+
+    public Player(Player player) {
+        this.color = player.color;
+        this.score = player.score;
+        this.isDrawing = player.isDrawing;
+    }
+
+    public Player(Color color) {
         this.color = color;
-        this.coloredSquareCount = 0;
+        this.score = 0;
         this.isDrawing = false;
     }
 
     public void incrementScore() {
-        this.coloredSquareCount++;
+        this.score++;
     }
 }

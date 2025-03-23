@@ -1,21 +1,30 @@
 package com.denyandconquer.common;
 
+import javafx.geometry.Point2D;
+
 public class Board {
-    Square[][] grid; // 8 x 8 board
-    int emptySquareCount; // 64 total squares
+    public static final int GRID_SIZE = 1;
+    public Square[][] grid; // 8 x 8 board
+    public int emptySquares; // 64 total squares
 
     public Board() {
-        this.emptySquareCount = 64; 
+        this.grid = new Square[GRID_SIZE][GRID_SIZE];
+        this.emptySquares = GRID_SIZE * GRID_SIZE;
+        for (int row = 0; row < GRID_SIZE; row++) {
+            for (int col = 0; col < GRID_SIZE; col++) {
+                grid[row][col] = new Square(new Point2D(col, row));
+            }
+        }
     }
 
     public Boolean isGameComplete() {
-        if (emptySquareCount == 0) {
-            return true;
-        }
-        return false;
+        return emptySquares == 0;
     }
 
-    public void determineWinner() {
-
+    public void decreaseEmptySquares() {
+        emptySquares--;
     }
+
+
+
 }

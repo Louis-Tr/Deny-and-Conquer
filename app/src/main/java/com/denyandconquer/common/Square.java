@@ -10,24 +10,41 @@ public class Square {
     private Player currentPlayerColor; // who colored in this square.
     private Color color;
     private Boolean isLocked;
-    private Integer filledPixels;
+    private Player owner;
+
+    public Player getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Player owner) {
+        this.owner = owner;
+    }
 
     public Square(Point2D inputPosition) {
         this.position = inputPosition;
         this.currentPlayerColor = null;
-        this.color = Color.rgb(255, 255, 255);
+        this.color = Color.WHITE;
         this.isLocked = false;
-        this.filledPixels = 0;
+    }
 
+    public Color getColor() {
+        return color;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public Player getCurrentPlayerColor() {
+        return currentPlayerColor;
+    }
+
+    public Boolean isLocked() {
+        return isLocked;
     }
 
     public boolean isWhite() {
-        Color white = Color.rgb(255, 255, 255);
-        if (color.equals(white)) {
-            return true;
-        }
-
-        return false;
+        return color.equals(Color.WHITE); 
     }
 
     public void lockSquare() {
@@ -38,11 +55,11 @@ public class Square {
         isLocked = false;
     }
 
-    public Float calculateFillPercent() { return 0.0F; }
-
     public void completeDrawing(Player player) {} // if percent > 50% then player owns square
 
-    public void resetToWhite() {}
+    public void resetToWhite() {
+        this.color = Color.WHITE;
+    }
 
     
 }
