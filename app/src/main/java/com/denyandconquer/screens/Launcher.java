@@ -21,9 +21,13 @@ import java.io.IOException;
  */
 public class Launcher extends Application {
 
-    // Store the launcher scene so it can be reused in callbacks.
+    // Store the launcher scene and room browser scene
+    // so it can be reused in callbacks.
+    private Stage primaryStage;
     private Scene launcherScene;
+    private Scene roomBrowserScene;
     private GameServer server;
+    private GameClient gameClient;
 
     /**
      * Main method that launches the JavaFX application.
@@ -42,6 +46,7 @@ public class Launcher extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
+        this.primaryStage = primaryStage;
         primaryStage.setTitle("Deny and Conquer Launcher");
 
         // Create buttons for options
@@ -71,6 +76,11 @@ public class Launcher extends Application {
             if (portNumber != -1) {
                 // Start new GameClient
                 GameClient client = new GameClient("localhost", portNumber, primaryStage);
+                this.gameClient = client;
+
+                Scene roomBrowserScene = new ListViewScene(this).getRoomBrowserScene();
+                this.roomBrowserScene = roomBrowserScene;
+                primaryStage.setScene(roomBrowserScene);
             }
 
 //            Scene joinServerScene = new InputScene().getJoinServerScene(() -> primaryStage.setScene(launcherScene));
@@ -79,10 +89,7 @@ public class Launcher extends Application {
 
         // Close server when closing window
         primaryStage.setOnCloseRequest(e -> {
-            if (server != null) {
-                System.out.println("Shutting down server...");
-                server.stopServer();
-            }
+            stopApplication();
         });
 
         // Arrange the buttons in a vertical layout
@@ -93,6 +100,27 @@ public class Launcher extends Application {
         launcherScene = new Scene(layout, 400, 300);
         primaryStage.setScene(launcherScene);
         primaryStage.show();
+    }
+
+    public void setScene(Scene newScene) {
+        this.primaryStage.setScene(newScene);
+    }
+    public Scene getLaucherScene() {
+        return launcherScene;
+    }
+
+    public Scene getRoomBrowserScene() {
+        return roomBrowserScene;
+    }
+
+    private void stopApplication() {
+        if (gameClient != null) {
+            gameClient.disconnect();
+        }
+        if (server != null) {
+            server.stopServer();
+        }
+        System.exit(0);
     }
 
     private int findPortNumber() {

@@ -12,25 +12,19 @@ public class GameClient extends Thread {
     private Socket socket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
-    private Stage stage;
-    private Scene prevScene;
 
     public GameClient(String serverAddress, int port, Stage primaryStage) {
 
         try {
-            this.stage = primaryStage;
-            this.prevScene = primaryStage.getScene();
             this.socket = new Socket(serverAddress, port);
             this.out = new ObjectOutputStream(socket.getOutputStream());
-            out.flush();
             this.in = new ObjectInputStream(socket.getInputStream());
             try {
                 this.player = (Player) in.readObject();
+                System.out.println("You are " + player.getName());
             } catch (Exception e){
                 e.printStackTrace();
             }
-            Scene roomBrowserScene = new ListViewScene(primaryStage).getRoomBrowserScene(() -> primaryStage.setScene(prevScene));
-            primaryStage.setScene(roomBrowserScene);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -111,6 +105,17 @@ public class GameClient extends Thread {
             if (socket != null) socket.close();
         } catch (IOException e) {
             System.out.println("Cleanup error for " + player.getName() + ": " + e.getMessage());
+        }
+    }
+
+    public void disconnect() {
+        try {
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+                System.out.println("[Client] Client disconnected.");
+            }
+        } catch (IOException e) {
+            System.out.println("[Client] Cannot disconnect.");
         }
     }
 }

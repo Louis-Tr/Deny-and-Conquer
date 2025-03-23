@@ -1,5 +1,6 @@
 package com.denyandconquer.screens;
 
+import com.denyandconquer.server.GameClient;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -13,20 +14,20 @@ import java.io.ObjectOutputStream;
 
 public class ListViewScene {
     private static ListView<String> listView = new ListView<>();
-    Stage primaryStage;
+    private Launcher launcher;
     GridPane grid;
     Label titleLabel;
     private static ObjectOutputStream out;
     private static ObjectInputStream in;
 
-    public ListViewScene(Stage primaryStage) {
-        this.primaryStage = primaryStage;
+    public ListViewScene(Launcher launcher) {
+        this.launcher = launcher;
         grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(10);
         grid.setVgap(10);
     }
-    public Scene getRoomBrowserScene (Runnable onBack) {
+    public Scene getRoomBrowserScene () {
 
         // Label Title, create refresh button, back button
         titleLabel = new Label("Available Game Rooms");
@@ -56,14 +57,12 @@ public class ListViewScene {
         createRoomBtn.setOnAction(e -> {
             System.out.println("Create Room clicked!");
 
-            Scene createRoomScene = new InputScene().getCreateRoomScene(() -> primaryStage.setScene(getRoomBrowserScene(onBack)));
-            primaryStage.setScene(createRoomScene);
+            Scene createRoomScene = new InputScene().getCreateRoomScene(launcher);
+            launcher.setScene(createRoomScene);
         });
 
         backButton.setOnAction(e -> {
-            if (onBack != null) {
-                onBack.run();
-            }
+            launcher.setScene(launcher.getLaucherScene());
         });
 
         Scene scene = new Scene(grid, 400, 300);
@@ -92,13 +91,11 @@ public class ListViewScene {
             System.out.println("Start Game clicked!");
 
 //            Scene gameBoardScene;
-//            primaryStage.setScene(gameBoardScene);
+//            gameClient.setScene(gameBoardScene);
         });
 
         leaveRoomButton.setOnAction(e -> {
-            System.out.println("Leave Room clicked!");
-//            Scene roomBrowserScene = getRoomBrowserScene(onBack);
-//            primaryStage.setScene(roomBrowserScene);
+            launcher.setScene(launcher.getRoomBrowserScene());
         });
 
         Scene scene = new Scene(grid, 400, 300);

@@ -1,5 +1,6 @@
 package com.denyandconquer.screens;
 
+import com.denyandconquer.server.GameClient;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -130,7 +131,7 @@ public class InputScene {
         return new Scene(grid, 400, 300);
     }
 
-    public Scene getCreateRoomScene(Runnable onBack) {
+    public Scene getCreateRoomScene(Launcher launcher) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(10);
@@ -140,16 +141,16 @@ public class InputScene {
         Label nameLabel = new Label("Room Name: ");
         TextField nameField = new TextField();
         grid.add(nameLabel,0,0);
-        grid.add(nameField, 0, 1);
+        grid.add(nameField, 2, 0);
 
         // Player number Input
-        Label numberLabel = new Label("Number of Players");
+        Label numberLabel = new Label("Number of Players: ");
         ChoiceBox<Integer> playerChoiceBox = new ChoiceBox<>();
         playerChoiceBox.getItems().addAll(2, 3, 4);
         playerChoiceBox.setValue(2);
 
-        grid.add(numberLabel, 1, 0);
-        grid.add(playerChoiceBox, 2, 0);
+        grid.add(numberLabel, 0, 1);
+        grid.add(playerChoiceBox, 2, 1);
 
         // Create room Button
         Button createButton = new Button("Create Room");
@@ -162,9 +163,7 @@ public class InputScene {
         Button backButton = new Button("Back");
         grid.add(backButton, 0, 3);
         backButton.setOnAction(e -> {
-            if (onBack != null) {
-                onBack.run();
-            }
+            launcher.setScene(launcher.getRoomBrowserScene());
         });
 
         return new Scene(grid, 400, 300);

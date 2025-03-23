@@ -13,7 +13,7 @@ public class GameServer {
     private RoomManager roomManager;
     private InetAddress host;
     private int port;
-    private boolean running = false;
+    private volatile boolean running = true;
     public GameServer() {
         this.roomManager = new RoomManager();
         this.playerList = Collections.synchronizedList(new ArrayList<>());
@@ -35,6 +35,8 @@ public class GameServer {
             while (running) {
                 try {
                     Socket socket = serverSocket.accept(); // incoming sockets
+                    if (!running) break;
+
                     GameThread gameThread = new GameThread(socket, playerList, roomManager);
                     gameThread.start();
                 } catch (IOException e) {
@@ -49,19 +51,27 @@ public class GameServer {
         } finally {
             stopServer();
         }
-
-
     }
 
     public void stopServer() {
+        if (!running) {
+            return;
+        }
         running = false;
-        if (serverSocket != null && !serverSocket.isClosed()) {
-            try {
-                serverSocket.close();
-                System.out.println("Server stopped");
-            } catch (IOException e) {
-                System.out.println("Error Server closing");
+        synchronized (playerList) {
+            for (GameThread player : new ArrayList<>(playerList)) { // Copy to avoid modification errors
+                player.stopThread();
+                playerList.remove(player);
             }
         }
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Server stopped");
     }
 }
