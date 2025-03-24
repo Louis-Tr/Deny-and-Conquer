@@ -3,6 +3,7 @@ package com.denyandconquer.screens;
 import com.denyandconquer.server.GameClient;
 import com.denyandconquer.server.GameServer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -75,7 +76,8 @@ public class Launcher extends Application {
             int portNumber = findPortNumber();
             if (portNumber != -1) {
                 // Start new GameClient
-                GameClient client = new GameClient("localhost", portNumber, primaryStage);
+                GameClient client = new GameClient("localhost", portNumber, this);
+                client.start();
                 this.gameClient = client;
 
                 Scene roomBrowserScene = new ListViewScene(this).getRoomBrowserScene();
@@ -103,7 +105,7 @@ public class Launcher extends Application {
     }
 
     public void setScene(Scene newScene) {
-        this.primaryStage.setScene(newScene);
+        Platform.runLater(() -> primaryStage.setScene(newScene));
     }
     public Scene getLaucherScene() {
         return launcherScene;
@@ -111,6 +113,10 @@ public class Launcher extends Application {
 
     public Scene getRoomBrowserScene() {
         return roomBrowserScene;
+    }
+
+    public GameClient getGameClient() {
+        return gameClient;
     }
 
     private void stopApplication() {

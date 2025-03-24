@@ -27,6 +27,7 @@ public class Message  implements Serializable {
     public Message(Type type, Object data, String roomName, Player player, int maxPlayers) {
         this.type = type;
         this.data = data;
+        this.roomName = roomName;
         this.player = player;
         this.maxPlayers = maxPlayers;
     }

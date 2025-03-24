@@ -37,21 +37,20 @@ public class GameThread extends Thread {
 
     @Override
     public void run() {
-        while (running && socket.isConnected()) {
-            try {
-                Object message = in.readObject();
-
+        try {
+            Object message;
+            while ((message = in.readObject()) != null) {
                 if (message instanceof String) {
                     handleTextMessage((String) message);
                 } else if (message instanceof Message) {
                     handleGameMessage((Message) message);
                 }
-
-            } catch (IOException | ClassNotFoundException e) {
-                System.out.println("Connection error: " + e.getMessage());
             }
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("[Server] Connection error: " + e.getMessage());
+        } finally {
+            cleanup();
         }
-        cleanup();
     }
 
     private void handleTextMessage(String message) {
@@ -108,12 +107,13 @@ public class GameThread extends Thread {
         }
     }
 
-    public void sendToClient(Object msg) {
+    public void sendToClient(Object obj) {
         try {
-            out.reset();
-            out.writeObject(msg);
-            System.out.println(msg);
+            out.writeObject(obj);
+            out.flush();
+            System.out.println("Message Sent");
         } catch (IOException e) {
+            e.printStackTrace();
             System.out.println("[Server] Cannot send message");
         }
 
@@ -121,7 +121,8 @@ public class GameThread extends Thread {
 
     private void requestCreateRoom(Message message) {
         Room newRoom = roomManager.CreateRoom(message.getRoomName(), message.getMaxPlayers());
-        sendToClient(newRoom);
+        Message msg = new Message(Message.Type.CREATE_ROOM, newRoom, message.getRoomName(), player, message.getMaxPlayers());
+        sendToClient(msg);
     }
 
     private void requestJoinRoom() {

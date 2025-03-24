@@ -1,8 +1,10 @@
 package com.denyandconquer.server;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Room {
+public class Room implements Serializable{
+    private static final long serialVersionUID = 1L;
     private String roomName;
     private int roomId;
     private List<GameThread> playerList;

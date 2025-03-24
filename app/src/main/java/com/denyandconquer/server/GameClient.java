@@ -1,5 +1,6 @@
 package com.denyandconquer.server;
 
+import com.denyandconquer.screens.Launcher;
 import com.denyandconquer.screens.ListViewScene;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -8,13 +9,14 @@ import java.io.*;
 import java.net.Socket;
 
 public class GameClient extends Thread {
+    Launcher launcher;
     private Player player;
     private Socket socket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
 
-    public GameClient(String serverAddress, int port, Stage primaryStage) {
-
+    public GameClient(String serverAddress, int port, Launcher launcher) {
+        this.launcher = launcher;
         try {
             this.socket = new Socket(serverAddress, port);
             this.out = new ObjectOutputStream(socket.getOutputStream());
@@ -33,20 +35,20 @@ public class GameClient extends Thread {
 
     @Override
     public void run() {
-            try {
-                Object message;
-                while ((message = in.readObject()) != null) {
-                    if (message instanceof String) {
-                        handleTextMessage((String) message);
-                    } else if (message instanceof Message) {
-                        handleGameMessage((Message) message);
-                    }
+        try {
+            Object message;
+            while ((message = in.readObject()) != null) {
+                if (message instanceof String) {
+                    handleTextMessage((String) message);
+                } else if (message instanceof Message) {
+                    handleGameMessage((Message) message);
                 }
-            } catch (IOException | ClassNotFoundException e) {
-                System.out.println("Connection error: " + e.getMessage());
-            } finally {
-                cleanup();
             }
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("[Client] Connection error: " + e.getMessage());
+        } finally {
+            cleanup();
+        }
     }
 
     private void handleTextMessage(String message) {
@@ -57,6 +59,8 @@ public class GameClient extends Thread {
         switch (message.getType()) {
             case CREATE_ROOM:
                 System.out.println("Room created" + message.getData());
+                Scene roomScene = new ListViewScene(launcher).getRoomScene(message.getRoomName());
+                launcher.setScene(roomScene);
                 break;
             case JOIN_ROOM:
                 System.out.println("Room joined" + message.getData());

@@ -1,5 +1,6 @@
 package com.denyandconquer.screens;
 
+import com.denyandconquer.controllers.CreateRoomController;
 import com.denyandconquer.server.GameClient;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -155,9 +156,9 @@ public class InputScene {
         // Create room Button
         Button createButton = new Button("Create Room");
         grid.add(createButton, 2, 3);
-        /** To do
-         *  From client-side, send create room request to server
-         */
+        // Create the controller and set the event handler
+        CreateRoomController controller = new CreateRoomController(nameField, playerChoiceBox, launcher.getGameClient());
+        createButton.setOnAction(controller::handleCreateRoom);
 
         // Back Button
         Button backButton = new Button("Back");

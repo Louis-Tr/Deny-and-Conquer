@@ -76,9 +76,9 @@ public class ListViewScene {
 //        }).start();
 //    }
 
-    public Scene getRoomScene() {
+    public Scene getRoomScene(String name) {
         // Label Title, create refresh button, back button
-        titleLabel = new Label("Game Rooms");
+        titleLabel = new Label(name);
         Button startGameBtn = new Button("Start Game");
         Button leaveRoomButton = new Button("Leave Room");
 
