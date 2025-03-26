@@ -5,8 +5,8 @@ import java.net.Socket;
 import java.util.List;
 
 public class GameThread extends Thread {
-    private int playerNumber = 1;
     private Player player;
+    private int playerNumber;
     private ObjectOutputStream out;
     private ObjectInputStream in;
     private Socket socket;
@@ -15,8 +15,9 @@ public class GameThread extends Thread {
     private volatile boolean running = true;
 
 
-    public GameThread(Socket socket, List<GameThread> list, RoomManager roomManager) {
+    public GameThread(Socket socket, int playerNumber, List<GameThread> list, RoomManager roomManager) {
         this.socket = socket;
+        this.playerNumber = playerNumber;
         this.playerlist = list;
         this.roomManager = roomManager;
 
@@ -25,8 +26,7 @@ public class GameThread extends Thread {
             in = new ObjectInputStream(socket.getInputStream());
 
             this.playerlist.add(this);
-            this.player = new Player(playerNumber);
-            playerNumber++;
+            this.player = new Player(this.playerNumber);
 
             sendToClient(player);
         } catch (IOException e) {
@@ -113,7 +113,6 @@ public class GameThread extends Thread {
         try {
             out.writeObject(obj);
             out.flush();
-            System.out.println("Message Sent");
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("[Server] Cannot send message");

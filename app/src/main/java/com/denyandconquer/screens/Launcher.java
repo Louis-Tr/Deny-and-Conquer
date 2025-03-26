@@ -59,58 +59,26 @@ public class Launcher extends Application {
 
         // Create buttons for options
         Button createServerBtn = new Button("Create Server");
-        Button playBtn = new Button("Play");
+        Button joinServerBtn = new Button("Join Server");
 
         // Listen for loading completion
         LoadingManager.loadingProperty().addListener((obs, oldValue, newValue) -> {
             if (!newValue) { // When loading completes
-                primaryStage.setScene(GameScene.getGameScene());
+                this.roomBrowserScene = new RoomBrowserScene(this);
+                gameClient.roomList();
+                primaryStage.setScene(roomBrowserScene.getRoomBrowserScene());
+//                primaryStage.setScene(GameScene.getGameScene());
             }
         });
 
 
         // Set actions for each button using the InputScene class and its callback.
         createServerBtn.setOnAction(e -> {
-
-            // Create and start the server in a new thread
-            if (server == null) {
-                server = new GameServer();
-                new Thread(server::startServer).start();
-            } else {
-                System.out.println("Server is already running.");
-            }
-
-//            Scene createServerScene = new InputScene().getCreateServerScene(() -> primaryStage.setScene(launcherScene));
-//            primaryStage.setScene(createServerScene);
-        });
-
-        playBtn.setOnAction(e -> {
-            System.out.println("Play button clicked!");
-
-            // Find the port number and start new GameClient
-            int portNumber = findPortNumber();
-            if (portNumber != -1) {
-                // Start new GameClient
-                GameClient client = new GameClient("localhost", portNumber, this);
-                client.start();
-                this.gameClient = client;
-
-                this.roomBrowserScene = new RoomBrowserScene(this);
-                client.roomList();
-                primaryStage.setScene(roomBrowserScene.getRoomBrowserScene());
-            }
-
-//            Scene joinServerScene = new InputScene().getJoinServerScene(() -> primaryStage.setScene(launcherScene));
-//            primaryStage.setScene(joinServerScene);
-        });
-
-        // Close server when closing window
-        primaryStage.setOnCloseRequest(e -> {
-            stopApplication();
             System.out.println("Create Server clicked!");
             Scene createServerScene = new InputScene().getCreateServerScene(
                     () -> primaryStage.setScene(launcherScene),
-                    () -> primaryStage.setScene(loadingSceneCreateServer));
+                    () -> primaryStage.setScene(loadingSceneCreateServer),
+                    this);
             primaryStage.setScene(createServerScene);
         });
 
@@ -118,14 +86,21 @@ public class Launcher extends Application {
             System.out.println("Join Server clicked!");
             Scene joinServerScene = new InputScene().getJoinServerScene(
                     () -> primaryStage.setScene(launcherScene),
-                    () -> primaryStage.setScene(loadingSceneJoinServer));
+                    () -> primaryStage.setScene(loadingSceneJoinServer),
+                    this);
             primaryStage.setScene(joinServerScene);
+        });
+
+        // Close server when closing window
+        primaryStage.setOnCloseRequest(e -> {
+            stopApplication();
         });
 
         // Arrange the buttons in a vertical layout
         VBox layout = new VBox(20); // 20 pixels of spacing
         layout.setAlignment(Pos.CENTER);
-        layout.getChildren().addAll(createServerBtn, playBtn);
+        layout.getChildren().addAll(createServerBtn, joinServerBtn);
+
         // Create the launcher scene and set it on the primary stage
         launcherScene = new Scene(layout, 400, 300);
         primaryStage.setScene(launcherScene);
@@ -157,22 +132,13 @@ public class Launcher extends Application {
         System.exit(0);
     }
 
-    private int findPortNumber() {
-        int portNumber = -1;
-
-        // Read the port number from file
-        try (BufferedReader reader = new BufferedReader(new FileReader("ports.txt"))) {
-            portNumber = Integer.parseInt(reader.readLine());
-        } catch (IOException ex) {
-            System.out.println("Reading port number error");
-        }
-
-        return portNumber;
-    }
-
     public void updateRoomList(List<Room> list) {
         Platform.runLater(() -> {
             roomBrowserScene.updateList(list);
         });
+    }
+    public void setNetwork(GameServer server, GameClient client) {
+        this.server = server;
+        this.gameClient = client;
     }
 }

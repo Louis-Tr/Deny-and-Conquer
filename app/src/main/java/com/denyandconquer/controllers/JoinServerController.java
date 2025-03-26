@@ -1,6 +1,8 @@
 package com.denyandconquer.controllers;
 
 import com.denyandconquer.global_state.LoadingManager;
+import com.denyandconquer.screens.Launcher;
+import com.denyandconquer.server.GameClient;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.TextField;
@@ -10,6 +12,7 @@ import javafx.scene.control.TextField;
  * It retrieves input from UI components and processes the join server request.
  */
 public class JoinServerController {
+    private Launcher launcher;
     private TextField usernameField;
     private TextField ipField;
     private TextField portField;
@@ -21,7 +24,8 @@ public class JoinServerController {
      * @param ipField       the TextField for entering the server IP address
      * @param portField     the TextField for entering the server port
      */
-    public JoinServerController(TextField usernameField, TextField ipField, TextField portField) {
+    public JoinServerController(Launcher launcher, TextField usernameField, TextField ipField, TextField portField) {
+        this.launcher = launcher;
         this.usernameField = usernameField;
         this.ipField = ipField;
         this.portField = portField;
@@ -40,12 +44,15 @@ public class JoinServerController {
     public void handleJoinServer(ActionEvent event) {
         String username = usernameField.getText();
         String serverIP = ipField.getText();
-        String port = portField.getText();
+        Integer port = Integer.parseInt(portField.getText());
         // For debug
         System.out.println("Joining server as " + username + " at " + serverIP + " on port " + port);
         // TODO: Implement server connection logic then call Platform.runLater() to set loading to false
         new Thread(() -> {
             try {
+                // Create a client for the user
+                GameClient client = new GameClient(serverIP, port, launcher);
+                launcher.setNetwork(null, client);
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();

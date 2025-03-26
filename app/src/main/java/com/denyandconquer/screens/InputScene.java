@@ -4,13 +4,7 @@ import com.denyandconquer.controllers.CreateRoomController;
 import com.denyandconquer.server.GameClient;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import com.denyandconquer.global_state.LoadingManager;
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import com.denyandconquer.controllers.CreateServerController;
@@ -23,7 +17,7 @@ public class InputScene {
      * Creates and returns a Scene for creating a new server.
      * Ensures all inputs are valid before proceeding.
      */
-    public Scene getCreateServerScene(Runnable onBack, Runnable toLoading) {
+    public Scene getCreateServerScene(Runnable onBack, Runnable toLoading, Launcher launcher) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(10);
@@ -59,7 +53,7 @@ public class InputScene {
             }
         });
 
-        CreateServerController controller = new CreateServerController(nameField, ipField, portField);
+        CreateServerController controller = new CreateServerController(launcher, nameField, ipField, portField);
 
         createButton.setOnAction(e -> {
             if (isValidInput(nameField, ipField, portField, errorLabel)) {
@@ -76,7 +70,7 @@ public class InputScene {
      * Creates and returns a Scene for joining an existing server.
      * Ensures all inputs are valid before proceeding.
      */
-    public Scene getJoinServerScene(Runnable onBack, Runnable toLoading) {
+    public Scene getJoinServerScene(Runnable onBack, Runnable toLoading, Launcher launcher) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(10);
@@ -112,7 +106,7 @@ public class InputScene {
             }
         });
 
-        JoinServerController controller = new JoinServerController(usernameField, ipField, portField);
+        JoinServerController controller = new JoinServerController(launcher, usernameField, ipField, portField);
 
         joinButton.setOnAction(e -> {
             if (isValidInput(usernameField, ipField, portField, errorLabel)) {
@@ -161,6 +155,7 @@ public class InputScene {
         });
 
         return new Scene(grid, 400, 300);
+    }
     /**
      * Validates input fields and displays an error message if validation fails.
      */
@@ -185,7 +180,7 @@ public class InputScene {
         }
 
         int portNumber = Integer.parseInt(port);
-        if (portNumber < 1 || portNumber > 65535) {
+        if (portNumber < 49152 || portNumber > 65535) {
             errorLabel.setText("Port must be between 1 and 65535.");
             return false;
         }
