@@ -52,6 +52,7 @@ public class JoinServerController {
             try {
                 // Create a client for the user
                 GameClient client = new GameClient(serverIP, port, launcher);
+                client.start();
                 launcher.setNetwork(null, client);
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
