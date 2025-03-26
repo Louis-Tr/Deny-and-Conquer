@@ -1,5 +1,7 @@
 package com.denyandconquer.controllers;
 
+import com.denyandconquer.global_state.LoadingManager;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.TextField;
 
@@ -38,6 +40,17 @@ public class CreateServerController {
 
         // For debug
         System.out.println("Creating server: " + serverName + " at " + serverIP + " on port " + port);
-        // TODO: Implement server creation logic
+        // TODO: Implement server creation logic then call Platform.runLater() to set loading to false
+        new Thread(() -> {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Platform.runLater(() -> {
+                LoadingManager.setLoading(false);
+                System.out.println("Loading finished. Navigating to the game screen...");
+            });
+        }).start();
     }
 }

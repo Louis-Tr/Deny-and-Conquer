@@ -3,6 +3,7 @@ package com.denyandconquer.screens;
 import com.denyandconquer.server.GameClient;
 import com.denyandconquer.server.GameServer;
 import com.denyandconquer.server.Room;
+import com.denyandconquer.global_state.LoadingManager;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -32,6 +33,9 @@ public class Launcher extends Application {
     private RoomBrowserScene roomBrowserScene;
     private GameServer server;
     private GameClient gameClient;
+    private Scene loadingSceneJoinServer = new LoadingScene().getLoadingScene("Join Server");
+    private Scene loadingSceneCreateServer = new LoadingScene().getLoadingScene("Create Server");
+
 
     /**
      * Main method that launches the JavaFX application.
@@ -56,6 +60,14 @@ public class Launcher extends Application {
         // Create buttons for options
         Button createServerBtn = new Button("Create Server");
         Button playBtn = new Button("Play");
+
+        // Listen for loading completion
+        LoadingManager.loadingProperty().addListener((obs, oldValue, newValue) -> {
+            if (!newValue) { // When loading completes
+                primaryStage.setScene(GameScene.getGameScene());
+            }
+        });
+
 
         // Set actions for each button using the InputScene class and its callback.
         createServerBtn.setOnAction(e -> {
@@ -95,6 +107,19 @@ public class Launcher extends Application {
         // Close server when closing window
         primaryStage.setOnCloseRequest(e -> {
             stopApplication();
+            System.out.println("Create Server clicked!");
+            Scene createServerScene = new InputScene().getCreateServerScene(
+                    () -> primaryStage.setScene(launcherScene),
+                    () -> primaryStage.setScene(loadingSceneCreateServer));
+            primaryStage.setScene(createServerScene);
+        });
+
+        joinServerBtn.setOnAction(e -> {
+            System.out.println("Join Server clicked!");
+            Scene joinServerScene = new InputScene().getJoinServerScene(
+                    () -> primaryStage.setScene(launcherScene),
+                    () -> primaryStage.setScene(loadingSceneJoinServer));
+            primaryStage.setScene(joinServerScene);
         });
 
         // Arrange the buttons in a vertical layout
