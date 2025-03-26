@@ -69,12 +69,12 @@ public class GameClient extends Thread {
             case LEAVE_ROOM:
                 System.out.println("Left the room");
                 break;
-            case REFRESH_ROOM:
+            case ROOM_LIST:
                 System.out.println("Refresh room list");
                 List<Room> list = (List<Room>) message.getData();
                 launcher.updateRoomList(list);
                 break;
-            case REFRESH_PLAYER:
+            case PLAYER_LIST:
                 System.out.println("Refresh player list");
                 break;
             case START_GAME:
@@ -105,6 +105,10 @@ public class GameClient extends Thread {
     }
     public void leaveRoom(){
         Message msg = new Message(Message.Type.LEAVE_ROOM, null, player);
+        send(msg);
+    }
+    public void roomList(){
+        Message msg = new Message(Message.Type.ROOM_LIST, null);
         send(msg);
     }
     public void startGame() {

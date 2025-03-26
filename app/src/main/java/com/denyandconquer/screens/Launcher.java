@@ -84,6 +84,7 @@ public class Launcher extends Application {
                 this.gameClient = client;
 
                 this.roomBrowserScene = new RoomBrowserScene(this);
+                client.roomList();
                 primaryStage.setScene(roomBrowserScene.getRoomBrowserScene());
             }
 
@@ -145,6 +146,8 @@ public class Launcher extends Application {
     }
 
     public void updateRoomList(List<Room> list) {
-        roomBrowserScene.updateList(list);
+        Platform.runLater(() -> {
+            roomBrowserScene.updateList(list);
+        });
     }
 }

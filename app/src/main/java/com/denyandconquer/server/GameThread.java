@@ -62,6 +62,8 @@ public class GameThread extends Thread {
             case CREATE_ROOM -> {requestCreateRoom(message);}
             case JOIN_ROOM -> {requestJoinRoom();}
             case LEAVE_ROOM -> {requestLeaveRoom();}
+            case ROOM_LIST -> {requestRoomList(false);}
+            case PLAYER_LIST -> {requestPlayerList();}
             case START_GAME -> {requestStartGame();}
             case CHECK_SQUARE -> {checkSquare();}
             case DRAW_SQUARE -> {drawSquare();}
@@ -126,9 +128,7 @@ public class GameThread extends Thread {
         sendToClient(msg);
 
         // Let all the player to update the list of rooms
-        List<Room> list = roomManager.getRoomList();
-        Message updateMsg = new Message(Message.Type.REFRESH_ROOM, list);
-        sendToAll(updateMsg);
+        requestRoomList(true);
     }
 
     private void requestJoinRoom() {
@@ -136,6 +136,19 @@ public class GameThread extends Thread {
     }
 
     private void requestLeaveRoom() {
+
+    }
+    private void requestRoomList(boolean isBroadcast) {
+        List<Room> list = roomManager.getRoomList();
+        Message msg = new Message(Message.Type.ROOM_LIST, list);
+
+        if (isBroadcast) {
+            sendToAll(msg);
+        } else{
+            sendToClient(msg);
+        }
+    }
+    private void requestPlayerList() {
 
     }
 
