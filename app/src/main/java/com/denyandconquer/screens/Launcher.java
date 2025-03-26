@@ -2,6 +2,7 @@ package com.denyandconquer.screens;
 
 import com.denyandconquer.server.GameClient;
 import com.denyandconquer.server.GameServer;
+import com.denyandconquer.server.Room;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -13,6 +14,8 @@ import javafx.stage.Stage;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Launcher is the main entry point for the Deny and Conquer application.
@@ -26,7 +29,7 @@ public class Launcher extends Application {
     // so it can be reused in callbacks.
     private Stage primaryStage;
     private Scene launcherScene;
-    private Scene roomBrowserScene;
+    private RoomBrowserScene roomBrowserScene;
     private GameServer server;
     private GameClient gameClient;
 
@@ -80,9 +83,8 @@ public class Launcher extends Application {
                 client.start();
                 this.gameClient = client;
 
-                Scene roomBrowserScene = new ListViewScene(this).getRoomBrowserScene();
-                this.roomBrowserScene = roomBrowserScene;
-                primaryStage.setScene(roomBrowserScene);
+                this.roomBrowserScene = new RoomBrowserScene(this);
+                primaryStage.setScene(roomBrowserScene.getRoomBrowserScene());
             }
 
 //            Scene joinServerScene = new InputScene().getJoinServerScene(() -> primaryStage.setScene(launcherScene));
@@ -112,7 +114,7 @@ public class Launcher extends Application {
     }
 
     public Scene getRoomBrowserScene() {
-        return roomBrowserScene;
+        return roomBrowserScene.getRoomBrowserScene();
     }
 
     public GameClient getGameClient() {
@@ -140,5 +142,9 @@ public class Launcher extends Application {
         }
 
         return portNumber;
+    }
+
+    public void updateRoomList(List<Room> list) {
+        roomBrowserScene.updateList(list);
     }
 }

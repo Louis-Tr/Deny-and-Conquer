@@ -120,9 +120,15 @@ public class GameThread extends Thread {
     }
 
     private void requestCreateRoom(Message message) {
+        // Create new room for the player and send it to the host
         Room newRoom = roomManager.CreateRoom(message.getRoomName(), message.getMaxPlayers());
         Message msg = new Message(Message.Type.CREATE_ROOM, newRoom, message.getRoomName(), player, message.getMaxPlayers());
         sendToClient(msg);
+
+        // Let all the player to update the list of rooms
+        List<Room> list = roomManager.getRoomList();
+        Message updateMsg = new Message(Message.Type.REFRESH_ROOM, list);
+        sendToAll(updateMsg);
     }
 
     private void requestJoinRoom() {

@@ -1,12 +1,13 @@
 package com.denyandconquer.server;
 
+import com.denyandconquer.screens.GameRoomScene;
 import com.denyandconquer.screens.Launcher;
-import com.denyandconquer.screens.ListViewScene;
+import com.denyandconquer.screens.RoomBrowserScene;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
-import javafx.application.Platform;
+
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 
 public class GameClient extends Thread {
     Launcher launcher;
@@ -59,7 +60,7 @@ public class GameClient extends Thread {
         switch (message.getType()) {
             case CREATE_ROOM:
                 System.out.println("Room created" + message.getData());
-                Scene roomScene = new ListViewScene(launcher).getRoomScene(message.getRoomName());
+                Scene roomScene = new GameRoomScene(launcher, message.getRoomName()).getRoomScene();
                 launcher.setScene(roomScene);
                 break;
             case JOIN_ROOM:
@@ -67,6 +68,14 @@ public class GameClient extends Thread {
                 break;
             case LEAVE_ROOM:
                 System.out.println("Left the room");
+                break;
+            case REFRESH_ROOM:
+                System.out.println("Refresh room list");
+                List<Room> list = (List<Room>) message.getData();
+                launcher.updateRoomList(list);
+                break;
+            case REFRESH_PLAYER:
+                System.out.println("Refresh player list");
                 break;
             case START_GAME:
                 System.out.println("Game started");

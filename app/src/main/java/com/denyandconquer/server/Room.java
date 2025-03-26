@@ -25,6 +25,9 @@ public class Room implements Serializable{
     public List<GameThread> getPlayers() {
         return playerList;
     }
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
     public void removePlayer(GameThread player) {
         playerList.remove(player);
     }

@@ -1,33 +1,41 @@
 package com.denyandconquer.screens;
 
-import com.denyandconquer.server.GameClient;
+import com.denyandconquer.server.Room;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Stage;
+import java.util.List;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-public class ListViewScene {
-    private static ListView<String> listView = new ListView<>();
+public class RoomBrowserScene {
+    private static ListView<Room> roomListView;
+    private Scene roomBrowserScene;
     private Launcher launcher;
     GridPane grid;
     Label titleLabel;
     private static ObjectOutputStream out;
     private static ObjectInputStream in;
 
-    public ListViewScene(Launcher launcher) {
+    public RoomBrowserScene(Launcher launcher) {
         this.launcher = launcher;
+        roomListView = new ListView<>();
         grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(10);
         grid.setVgap(10);
+        roomBrowserScene = createRoomBrowserScene();
     }
-    public Scene getRoomBrowserScene () {
+
+    public Scene getRoomBrowserScene() {
+        return roomBrowserScene;
+    }
+    private Scene createRoomBrowserScene() {
 
         // Label Title, create refresh button, back button
         titleLabel = new Label("Available Game Rooms");
@@ -35,7 +43,7 @@ public class ListViewScene {
         Button backButton = new Button("Back");
 
         grid.add(titleLabel, 0, 0, 2, 1);
-        grid.add(listView, 0,1, 3, 2);
+        grid.add(roomListView, 0,1, 3, 2);
         grid.add(createRoomBtn, 3, 1);
         grid.add(backButton, 0, 4);
 
@@ -76,30 +84,23 @@ public class ListViewScene {
 //        }).start();
 //    }
 
-    public Scene getRoomScene(String name) {
-        // Label Title, create refresh button, back button
-        titleLabel = new Label(name);
-        Button startGameBtn = new Button("Start Game");
-        Button leaveRoomButton = new Button("Leave Room");
+    public void updateList(List<Room> list) {
+        roomListView.getItems().clear();
+        roomListView.getItems().addAll(list);
 
-        grid.add(titleLabel, 0, 0, 2, 1);
-        grid.add(listView, 0,1, 3, 2);
-        grid.add(startGameBtn, 3, 1);
-        grid.add(leaveRoomButton, 0, 4);
-
-        startGameBtn.setOnAction(e -> {
-            System.out.println("Start Game clicked!");
-
-//            Scene gameBoardScene;
-//            gameClient.setScene(gameBoardScene);
+        // Display room details
+        roomListView.setCellFactory(param -> new ListCell<Room>() {
+            @Override
+            protected void updateItem(Room room, boolean empty) {
+                super.updateItem(room, empty);
+                if (empty || room == null) {
+                    setText(null);
+                } else {
+                    setText(room.getRoomName() + " (Players: " + room.getPlayers().size() + "/" + room.getMaxPlayers() + ")");
+                }
+            }
         });
 
-        leaveRoomButton.setOnAction(e -> {
-            launcher.setScene(launcher.getRoomBrowserScene());
-        });
-
-        Scene scene = new Scene(grid, 400, 300);
-
-        return scene;
     }
+
 }

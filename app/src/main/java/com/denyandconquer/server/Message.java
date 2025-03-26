@@ -7,6 +7,8 @@ public class Message  implements Serializable {
         CREATE_ROOM,
         JOIN_ROOM,
         LEAVE_ROOM,
+        REFRESH_ROOM,
+        REFRESH_PLAYER,
         START_GAME,
         CHECK_SQUARE,
         DRAW_SQUARE,
@@ -19,6 +21,10 @@ public class Message  implements Serializable {
     private int maxPlayers = 0;
     private String roomName;
 
+    public Message(Type type, Object data) {
+        this.type = type;
+        this.data = data;
+    }
     public Message(Type type, Object data, Player player) {
         this.type = type;
         this.data = data;
