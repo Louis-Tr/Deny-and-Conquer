@@ -76,6 +76,7 @@ public class GameClient extends Thread {
             case PLAYER_LIST:
                 System.out.println("Refresh player list");
                 List<Player> playerList = (List<Player>) message.getData();
+                System.out.println("Received: "+ playerList);
                 launcher.updatePlayerList(playerList);
                 break;
             case START_GAME:
@@ -90,6 +91,7 @@ public class GameClient extends Thread {
 
     public void send(Object obj) {
         try {
+            out.reset();
             out.writeObject(obj);
             out.flush();
         } catch (IOException e) {

@@ -75,13 +75,16 @@ public class GameThread extends Thread {
 
 
     private void sendToAll(Object msg) {
-        for (GameThread player: threadMap.values()) {
-            player.sendToClient(msg);
+        for (GameThread thread: threadMap.values()) {
+            thread.sendToClient(msg);
         }
     }
 
     private void sendToRoom(Room room, Object msg) {
         for (Player player: room.getPlayerList()) {
+            System.out.println("send to player " + player.getPlayerNumber());
+            List<Player> list = (List<Player>) ((Message)msg).getData();
+            System.out.println("Message: " + list);
             GameThread thread = threadMap.get(player.getPlayerNumber());
             if (thread != null) {
                 thread.sendToClient(msg);
@@ -91,6 +94,7 @@ public class GameThread extends Thread {
 
     public void sendToClient(Object obj) {
         try {
+            out.reset();
             out.writeObject(obj);
             out.flush();
         } catch (IOException e) {

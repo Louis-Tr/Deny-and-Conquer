@@ -56,6 +56,7 @@ public class RoomBrowserScene {
         roomListView.setOnMouseClicked(e -> {
             Room seletedRoom = roomListView.getSelectionModel().getSelectedItem();
             if (seletedRoom != null) {
+                System.out.println("Join Room clicked!");
                 joinRoom(seletedRoom);
             }
         });
