@@ -10,18 +10,22 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.GridPane;
 import java.util.List;
 
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-
+/**
+ * The RoomBrowserScene class displays a list of available game rooms
+ * and allow players to join an existing room or create a new room.
+ */
 public class RoomBrowserScene {
     private static ListView<Room> roomListView;
     private Scene roomBrowserScene;
     private Launcher launcher;
     GridPane grid;
     Label titleLabel;
-    private static ObjectOutputStream out;
-    private static ObjectInputStream in;
 
+    /**
+     * Init RoomBrowserScene
+     * @param launcher used for scene transitions
+     *                 and client calling to send message to server
+     */
     public RoomBrowserScene(Launcher launcher) {
         this.launcher = launcher;
         roomListView = new ListView<>();
@@ -32,9 +36,10 @@ public class RoomBrowserScene {
         roomBrowserScene = createRoomBrowserScene();
     }
 
-    public Scene getRoomBrowserScene() {
-        return roomBrowserScene;
-    }
+    /**
+     * Creates the UI layout and event handlers for the room browser scene.
+     * @return the room browser scene object.
+     */
     private Scene createRoomBrowserScene() {
 
         // Label Title, create refresh button, back button
@@ -47,28 +52,22 @@ public class RoomBrowserScene {
         grid.add(createRoomBtn, 3, 1);
         grid.add(backButton, 0, 4);
 
-        // Actions
-        /** To do
-         * Selected Room -> Enter the room
-         * */
+        // Event listener for room selection to join
+        roomListView.setOnMouseClicked(e -> {
+            Room seletedRoom = roomListView.getSelectionModel().getSelectedItem();
+            if (seletedRoom != null) {
+                joinRoom(seletedRoom);
+            }
+        });
 
-        // Set up room selection
-//        roomListView.setOnMouseClicked(e -> {
-//            String seletedRoom = roomListView.getSelectionModel().getSelectedItem();
-//            if (seletedRoom != null) {
-//                joinRoom(seletedRoom, serverAddress, port, onRoomJoined);
-//            }
-//        });
-//
-//        requestRoomList(serverAddress, port);
-
+        // Event listener for room creation
         createRoomBtn.setOnAction(e -> {
             System.out.println("Create Room clicked!");
-
             Scene createRoomScene = new InputScene().getCreateRoomScene(launcher);
             launcher.setScene(createRoomScene);
         });
 
+        // Event listener for navigating back to launcher scene
         backButton.setOnAction(e -> {
             launcher.setScene(launcher.getLaucherScene());
         });
@@ -78,12 +77,26 @@ public class RoomBrowserScene {
         return scene;
     }
 
-//    private static void requestRoomList(String serverAddress, int port) {
-//        new Thread(() -> {
-//            tr
-//        }).start();
-//    }
+    /**
+     * Returns the scene for the room browser
+     * @return The scene object
+     */
+    public Scene getRoomBrowserScene() {
+        return roomBrowserScene;
+    }
 
+    /**
+     * Sends a request to join the selected room.
+     * @param seletedRoom the room that player wants to join.
+     */
+    private void joinRoom(Room seletedRoom) {
+        launcher.getGameClient().sendJoinRoomRequest(seletedRoom.getRoomId());
+    }
+
+    /**
+     * Updates the ListView with the latest list of available rooms.
+     * @param list the list of available rooms.
+     */
     public void updateList(List<Room> list) {
         roomListView.getItems().clear();
         roomListView.getItems().addAll(list);

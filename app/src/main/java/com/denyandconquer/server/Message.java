@@ -7,6 +7,7 @@ public class Message  implements Serializable {
         CREATE_ROOM,
         JOIN_ROOM,
         LEAVE_ROOM,
+        ENTER_ROOM,
         ROOM_LIST,
         PLAYER_LIST,
         START_GAME,

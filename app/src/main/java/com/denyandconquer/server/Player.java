@@ -17,4 +17,9 @@ public class Player implements Serializable {
     public int getPlayerNumber() {
         return playerNumber;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

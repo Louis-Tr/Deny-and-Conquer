@@ -1,7 +1,6 @@
 package com.denyandconquer.controllers;
 
 import com.denyandconquer.server.GameClient;
-import com.denyandconquer.server.Message;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
@@ -23,6 +22,6 @@ public class CreateRoomController {
         String roomName = nameField.getText();
         int playerNumber = playerChoiceBox.getValue();
 
-        gameClient.createRoom(roomName, playerNumber);
+        gameClient.sendCreateRoomRequest(roomName, playerNumber);
     }
 }

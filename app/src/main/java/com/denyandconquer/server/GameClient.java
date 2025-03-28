@@ -2,7 +2,6 @@ package com.denyandconquer.server;
 
 import com.denyandconquer.screens.GameRoomScene;
 import com.denyandconquer.screens.Launcher;
-import com.denyandconquer.screens.RoomBrowserScene;
 import javafx.scene.Scene;
 
 import java.io.*;
@@ -58,24 +57,26 @@ public class GameClient extends Thread {
 
     private void handleGameMessage(Message message) {
         switch (message.getType()) {
-            case CREATE_ROOM:
-                System.out.println("Room created" + message.getData());
-                Scene roomScene = new GameRoomScene(launcher, message.getRoomName()).getRoomScene();
-                launcher.setScene(roomScene);
-                break;
-            case JOIN_ROOM:
-                System.out.println("Room joined" + message.getData());
+            case ENTER_ROOM:
+                System.out.println("Room entered");
+                Room room = (Room) message.getData();
+                GameRoomScene gameRoomScene = new GameRoomScene(launcher, room);
+                launcher.setGameRoomScene(gameRoomScene);
+                launcher.setScene(gameRoomScene.getRoomScene());
+                launcher.updatePlayerList(room.getPlayerList());
                 break;
             case LEAVE_ROOM:
                 System.out.println("Left the room");
                 break;
             case ROOM_LIST:
                 System.out.println("Refresh room list");
-                List<Room> list = (List<Room>) message.getData();
-                launcher.updateRoomList(list);
+                List<Room> roomList = (List<Room>) message.getData();
+                launcher.updateRoomList(roomList);
                 break;
             case PLAYER_LIST:
                 System.out.println("Refresh player list");
+                List<Player> playerList = (List<Player>) message.getData();
+                launcher.updatePlayerList(playerList);
                 break;
             case START_GAME:
                 System.out.println("Game started");
@@ -95,23 +96,23 @@ public class GameClient extends Thread {
             System.out.println("Connection error: " + e.getMessage());
         }
     }
-    public void createRoom(String roomName, int maxPlayers) {
+    public void sendCreateRoomRequest(String roomName, int maxPlayers) {
         Message msg = new Message(Message.Type.CREATE_ROOM, roomName, player, maxPlayers);
         send(msg);
     }
-    public void joinRoom(int roomId) {
+    public void sendJoinRoomRequest(int roomId) {
         Message msg = new Message(Message.Type.JOIN_ROOM, roomId, player);
         send(msg);
     }
-    public void leaveRoom(){
+    public void sendLeaveRoomRequest(){
         Message msg = new Message(Message.Type.LEAVE_ROOM, null, player);
         send(msg);
     }
-    public void roomList(){
+    public void sendRoomListRequest(){
         Message msg = new Message(Message.Type.ROOM_LIST, null);
         send(msg);
     }
-    public void startGame() {
+    public void sendStartGameRequest() {
         Message msg = new Message(Message.Type.START_GAME, null, player);
         send(msg);
     }

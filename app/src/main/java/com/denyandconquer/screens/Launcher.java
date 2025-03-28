@@ -1,8 +1,6 @@
 package com.denyandconquer.screens;
 
-import com.denyandconquer.server.GameClient;
-import com.denyandconquer.server.GameServer;
-import com.denyandconquer.server.Room;
+import com.denyandconquer.server.*;
 import com.denyandconquer.global_state.LoadingManager;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -12,10 +10,6 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,12 +23,14 @@ public class Launcher extends Application {
     // Store the launcher scene and room browser scene
     // so it can be reused in callbacks.
     private Stage primaryStage;
-    private Scene launcherScene;
-    private RoomBrowserScene roomBrowserScene;
-    private GameServer server;
-    private GameClient gameClient;
     private Scene loadingSceneJoinServer = new LoadingScene().getLoadingScene("Join Server");
     private Scene loadingSceneCreateServer = new LoadingScene().getLoadingScene("Create Server");
+    private Scene launcherScene;
+    private RoomBrowserScene roomBrowserScene;
+    private GameRoomScene gameRoomScene;
+    private GameServer server;
+    private GameClient gameClient;
+
 
 
     /**
@@ -65,7 +61,7 @@ public class Launcher extends Application {
         LoadingManager.loadingProperty().addListener((obs, oldValue, newValue) -> {
             if (!newValue) { // When loading completes
                 this.roomBrowserScene = new RoomBrowserScene(this);
-                gameClient.roomList();
+                gameClient.sendRoomListRequest();
                 primaryStage.setScene(roomBrowserScene.getRoomBrowserScene());
 //                primaryStage.setScene(GameScene.getGameScene());
             }
@@ -132,13 +128,23 @@ public class Launcher extends Application {
         System.exit(0);
     }
 
-    public void updateRoomList(List<Room> list) {
+    public void updateRoomList(List<Room> roomList) {
         Platform.runLater(() -> {
-            roomBrowserScene.updateList(list);
+            roomBrowserScene.updateList(roomList);
         });
     }
     public void setNetwork(GameServer server, GameClient client) {
         this.server = server;
         this.gameClient = client;
+    }
+
+    public void updatePlayerList(List<Player> playerList) {
+        Platform.runLater(() -> {
+            gameRoomScene.updateList(playerList);
+        });
+    }
+
+    public void setGameRoomScene(GameRoomScene roomScene) {
+        this.gameRoomScene = roomScene;
     }
 }
