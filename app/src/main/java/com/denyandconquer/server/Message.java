@@ -1,6 +1,12 @@
 package com.denyandconquer.server;
 
 import java.io.Serializable;
+
+/**
+ * The Message class is used to sum up data that is sent between network.
+ * It contains the message type, data, and other related information.
+ * It is serializable.
+ */
 public class Message  implements Serializable {
 
     public enum Type {

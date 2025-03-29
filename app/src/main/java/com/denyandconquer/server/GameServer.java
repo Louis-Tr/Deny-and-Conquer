@@ -6,6 +6,10 @@ import java.net.Socket;
 import java.util.*;
 import java.io.IOException;
 
+/**
+ * The GameServer class connects with incoming client,
+ * and creating new game threads for each connected client.
+ */
 public class GameServer {
     private String serverIP;
     private int port;
@@ -13,34 +17,38 @@ public class GameServer {
     private Map<Integer, GameThread> threadMap;
     private int playerNumber = 1;
     private RoomManager roomManager;
-    private InetAddress host;
     private volatile boolean running = true;
+
+    /**
+     * Initializes the GameServer with provided IP and port,
+     * RoomManager and threadMap for managing rooms and game threads.
+     * @param serverIP
+     * @param port
+     */
     public GameServer(String serverIP, int port) {
         this.serverIP = serverIP;
         this.port = port;
         this.roomManager = new RoomManager();
         this.threadMap = Collections.synchronizedMap(new HashMap<>());
     }
+
+    /**
+     * Starts the server and listens for incoming client connections.
+     * For each client, it starts a new GameThread to handle the client communication.
+     */
     public void startServer() {
         try {
-//            serverSocket = new ServerSocket(0); // either fixed or dynamic
-//            host = InetAddress.getLocalHost();
-//            port = serverSocket.getLocalPort();
-//            System.out.println("Server started at:");
-//            System.out.println("Address: " + host.getHostAddress());
-//            System.out.println("Port: " + port);
+            // Init ServerSocket
             serverSocket = new ServerSocket(port);
             running = true;
 
-//            try (PrintWriter writer = new PrintWriter(new FileWriter("ports.txt"))) {
-//                writer.println(port);
-//            }
-
             while (running) {
                 try {
-                    Socket socket = serverSocket.accept(); // incoming sockets
+                    // Accept a new client connection
+                    Socket socket = serverSocket.accept();
                     if (!running) break;
 
+                    // Create a new game thread to handle the client
                     GameThread gameThread = new GameThread(socket, playerNumber, threadMap, roomManager);
                     gameThread.start();
                     playerNumber++;
@@ -50,7 +58,6 @@ public class GameServer {
                     }
                 }
             }
-
         } catch (IOException e) {
             System.out.println("Server error");
         } finally {
@@ -58,17 +65,23 @@ public class GameServer {
         }
     }
 
+    /**
+     * Stops the server by stopping all game threads,
+     * and closing the server socket.
+     */
     public void stopServer() {
         if (!running) {
             return;
         }
         running = false;
+
+        // Clear all game threads
         synchronized (threadMap) {
             List<GameThread> players = new ArrayList<>(threadMap.values());
             for (GameThread player : players) {
                 player.stopThread();
             }
-            threadMap.clear(); // clear all game threads
+            threadMap.clear();
         }
         try {
             if (serverSocket != null && !serverSocket.isClosed()) {

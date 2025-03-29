@@ -119,13 +119,16 @@ public class InputScene {
         return new Scene(grid, 400, 300);
     }
 
+    /**
+     * Creates and returns a Scene for creating a new room.
+     */
     public Scene getCreateRoomScene(Launcher launcher) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(10);
         grid.setVgap(10);
 
-        // Server IP Input
+        // Room name Input
         Label nameLabel = new Label("Room Name: ");
         TextField nameField = new TextField();
         grid.add(nameLabel,0,0);
@@ -143,9 +146,23 @@ public class InputScene {
         // Create room Button
         Button createButton = new Button("Create Room");
         grid.add(createButton, 2, 3);
-        // Create the controller and set the event handler
+
+        // Error message label
+        Label errorLabel = new Label();
+        errorLabel.setStyle("-fx-text-fill: red;");
+        grid.add(errorLabel, 1, 4);
+
+        // Create the controller and set the event handler for Create Room Button
         CreateRoomController controller = new CreateRoomController(nameField, playerChoiceBox, launcher.getGameClient());
-        createButton.setOnAction(controller::handleCreateRoom);
+        createButton.setOnAction(e -> {
+            String roomName = nameField.getText().trim();
+            if (roomName.isEmpty()) {
+                errorLabel.setText("Room name cannot be empty!");
+            } else {
+                errorLabel.setText("");
+                controller.handleCreateRoom(e);
+            }
+        });
 
         // Back Button
         Button backButton = new Button("Back");
@@ -156,6 +173,7 @@ public class InputScene {
 
         return new Scene(grid, 400, 300);
     }
+
     /**
      * Validates input fields and displays an error message if validation fails.
      */

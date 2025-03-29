@@ -3,6 +3,13 @@ package com.denyandconquer.server;
 import java.io.Serializable;
 import java.util.*;
 
+/**
+ * The Room class represents a game room.
+ * It contains room name, unique room id, and players in the room.
+ * It manages adding and removing players.
+ * It checks if the room is full.
+ * It is serializable.
+ */
 public class Room implements Serializable{
     private static final long serialVersionUID = 1L;
     private String roomName;
@@ -38,9 +45,6 @@ public class Room implements Serializable{
         boolean flag = false;
         if(playerList.size() < maxPlayers) {
             playerList.add(player);
-            for(Player p:playerList){
-                System.out.println(p.getName());
-            }
             flag = true;
         }
         return flag;
