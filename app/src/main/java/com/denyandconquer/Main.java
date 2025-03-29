@@ -7,6 +7,7 @@ import com.denyandconquer.screens.Launcher;
 
 public class Main {
     public static void main(String[] args) {
+
         Application.launch(Launcher.class, args);
         // Application.launch(GameUI.class, args);
     }

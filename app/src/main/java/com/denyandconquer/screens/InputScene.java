@@ -1,20 +1,23 @@
 package com.denyandconquer.screens;
 
-import com.denyandconquer.global_state.LoadingManager;
+import com.denyandconquer.controllers.CreateRoomController;
+import com.denyandconquer.server.GameClient;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import com.denyandconquer.global_state.LoadingManager;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import com.denyandconquer.controllers.CreateServerController;
 import com.denyandconquer.controllers.JoinServerController;
 
 public class InputScene {
+    Label titleLabel;
 
     /**
      * Creates and returns a Scene for creating a new server.
      * Ensures all inputs are valid before proceeding.
      */
-    public Scene getCreateServerScene(Runnable onBack, Runnable toLoading) {
+    public Scene getCreateServerScene(Runnable onBack, Runnable toLoading, Launcher launcher) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(10);
@@ -50,7 +53,7 @@ public class InputScene {
             }
         });
 
-        CreateServerController controller = new CreateServerController(nameField, ipField, portField);
+        CreateServerController controller = new CreateServerController(launcher, nameField, ipField, portField);
 
         createButton.setOnAction(e -> {
             if (isValidInput(nameField, ipField, portField, errorLabel)) {
@@ -67,7 +70,7 @@ public class InputScene {
      * Creates and returns a Scene for joining an existing server.
      * Ensures all inputs are valid before proceeding.
      */
-    public Scene getJoinServerScene(Runnable onBack, Runnable toLoading) {
+    public Scene getJoinServerScene(Runnable onBack, Runnable toLoading, Launcher launcher) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(10);
@@ -103,7 +106,7 @@ public class InputScene {
             }
         });
 
-        JoinServerController controller = new JoinServerController(usernameField, ipField, portField);
+        JoinServerController controller = new JoinServerController(launcher, usernameField, ipField, portField);
 
         joinButton.setOnAction(e -> {
             if (isValidInput(usernameField, ipField, portField, errorLabel)) {
@@ -116,6 +119,43 @@ public class InputScene {
         return new Scene(grid, 400, 300);
     }
 
+    public Scene getCreateRoomScene(Launcher launcher) {
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(20));
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        // Server IP Input
+        Label nameLabel = new Label("Room Name: ");
+        TextField nameField = new TextField();
+        grid.add(nameLabel,0,0);
+        grid.add(nameField, 2, 0);
+
+        // Player number Input
+        Label numberLabel = new Label("Number of Players: ");
+        ChoiceBox<Integer> playerChoiceBox = new ChoiceBox<>();
+        playerChoiceBox.getItems().addAll(2, 3, 4);
+        playerChoiceBox.setValue(2);
+
+        grid.add(numberLabel, 0, 1);
+        grid.add(playerChoiceBox, 2, 1);
+
+        // Create room Button
+        Button createButton = new Button("Create Room");
+        grid.add(createButton, 2, 3);
+        // Create the controller and set the event handler
+        CreateRoomController controller = new CreateRoomController(nameField, playerChoiceBox, launcher.getGameClient());
+        createButton.setOnAction(controller::handleCreateRoom);
+
+        // Back Button
+        Button backButton = new Button("Back");
+        grid.add(backButton, 0, 3);
+        backButton.setOnAction(e -> {
+            launcher.setScene(launcher.getRoomBrowserScene());
+        });
+
+        return new Scene(grid, 400, 300);
+    }
     /**
      * Validates input fields and displays an error message if validation fails.
      */
@@ -140,7 +180,7 @@ public class InputScene {
         }
 
         int portNumber = Integer.parseInt(port);
-        if (portNumber < 1 || portNumber > 65535) {
+        if (portNumber < 49152 || portNumber > 65535) {
             errorLabel.setText("Port must be between 1 and 65535.");
             return false;
         }

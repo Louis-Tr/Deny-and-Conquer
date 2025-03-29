@@ -1,12 +1,16 @@
 package com.denyandconquer.screens;
 
+import com.denyandconquer.server.*;
 import com.denyandconquer.global_state.LoadingManager;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import java.util.List;
 
 /**
  * Launcher is the main entry point for the Deny and Conquer application.
@@ -16,10 +20,17 @@ import javafx.stage.Stage;
  */
 public class Launcher extends Application {
 
-    // Store the launcher scene so it can be reused in callbacks.
-    private Scene launcherScene;
+    // Store the launcher scene and room browser scene
+    // so it can be reused in callbacks.
+    private Stage primaryStage;
     private Scene loadingSceneJoinServer = new LoadingScene().getLoadingScene("Join Server");
     private Scene loadingSceneCreateServer = new LoadingScene().getLoadingScene("Create Server");
+    private Scene launcherScene;
+    private RoomBrowserScene roomBrowserScene;
+    private GameRoomScene gameRoomScene;
+    private GameServer server;
+    private GameClient gameClient;
+
 
 
     /**
@@ -39,6 +50,7 @@ public class Launcher extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
+        this.primaryStage = primaryStage;
         primaryStage.setTitle("Deny and Conquer Launcher");
 
         // Create buttons for options
@@ -48,7 +60,10 @@ public class Launcher extends Application {
         // Listen for loading completion
         LoadingManager.loadingProperty().addListener((obs, oldValue, newValue) -> {
             if (!newValue) { // When loading completes
-                primaryStage.setScene(GameScene.getGameScene());
+                this.roomBrowserScene = new RoomBrowserScene(this);
+                gameClient.sendRoomListRequest(false);
+                primaryStage.setScene(roomBrowserScene.getRoomBrowserScene());
+//                primaryStage.setScene(GameScene.getGameScene());
             }
         });
 
@@ -58,7 +73,8 @@ public class Launcher extends Application {
             System.out.println("Create Server clicked!");
             Scene createServerScene = new InputScene().getCreateServerScene(
                     () -> primaryStage.setScene(launcherScene),
-                    () -> primaryStage.setScene(loadingSceneCreateServer));
+                    () -> primaryStage.setScene(loadingSceneCreateServer),
+                    this);
             primaryStage.setScene(createServerScene);
         });
 
@@ -66,8 +82,14 @@ public class Launcher extends Application {
             System.out.println("Join Server clicked!");
             Scene joinServerScene = new InputScene().getJoinServerScene(
                     () -> primaryStage.setScene(launcherScene),
-                    () -> primaryStage.setScene(loadingSceneJoinServer));
+                    () -> primaryStage.setScene(loadingSceneJoinServer),
+                    this);
             primaryStage.setScene(joinServerScene);
+        });
+
+        // Close server when closing window
+        primaryStage.setOnCloseRequest(e -> {
+            stopApplication();
         });
 
         // Arrange the buttons in a vertical layout
@@ -79,5 +101,50 @@ public class Launcher extends Application {
         launcherScene = new Scene(layout, 400, 300);
         primaryStage.setScene(launcherScene);
         primaryStage.show();
+    }
+
+    public void setScene(Scene newScene) {
+        Platform.runLater(() -> primaryStage.setScene(newScene));
+    }
+    public Scene getLaucherScene() {
+        return launcherScene;
+    }
+
+    public Scene getRoomBrowserScene() {
+        return roomBrowserScene.getRoomBrowserScene();
+    }
+
+    public GameClient getGameClient() {
+        return gameClient;
+    }
+
+    private void stopApplication() {
+        if (gameClient != null) {
+            gameClient.disconnect();
+        }
+        if (server != null) {
+            server.stopServer();
+        }
+        System.exit(0);
+    }
+
+    public void updateRoomList(List<Room> roomList) {
+        Platform.runLater(() -> {
+            roomBrowserScene.updateList(roomList);
+        });
+    }
+    public void setNetwork(GameServer server, GameClient client) {
+        this.server = server;
+        this.gameClient = client;
+    }
+
+    public void updatePlayerList(List<Player> playerList) {
+        Platform.runLater(() -> {
+            gameRoomScene.updateList(playerList);
+        });
+    }
+
+    public void setGameRoomScene(GameRoomScene roomScene) {
+        this.gameRoomScene = roomScene;
     }
 }
