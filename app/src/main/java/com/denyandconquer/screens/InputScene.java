@@ -181,7 +181,7 @@ public class InputScene {
 
         int portNumber = Integer.parseInt(port);
         if (portNumber < 49152 || portNumber > 65535) {
-            errorLabel.setText("Port must be between 1 and 65535.");
+            errorLabel.setText("Port must be between 49152 and 65535.");
             return false;
         }
 
