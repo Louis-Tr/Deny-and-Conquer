@@ -133,7 +133,28 @@ public class GameThread extends Thread {
     }
 
     private void requestLeaveRoom() {
+        //1. first find the room the player belongs to
+        Room currentRoom = roomManager.findRoomByPlayer(player);
+        if(currentRoom != null){
+            //2. Remove the player from the room
 
+            currentRoom.removePlayer(player);
+
+            Message msg = new Message(Message.Type.PLAYER_LIST, currentRoom.getPlayerList());
+            //3. Notify the players in the room about the deletion
+            sendToRoom(currentRoom, msg);
+
+            //4. If the room is empty, delete the room.
+            if(currentRoom.getPlayerList().isEmpty()){
+                roomManager.removeRoom(currentRoom.getRoomId());
+                Message newMsg = new Message(Message.Type.ROOM_LIST, true);
+                requestRoomList(newMsg);
+            }
+
+        }
+        else {
+            System.out.println("[Server] Empty Room");
+        }
     }
     private void requestRoomList(Message message) {
         List<Room> list = roomManager.getRoomList();

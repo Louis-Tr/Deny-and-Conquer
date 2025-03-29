@@ -32,4 +32,13 @@ public class RoomManager {
     public synchronized List<Room> getRoomList() {
         return new ArrayList<>(roomList);
     }
+    //added for remove player
+    public synchronized Room findRoomByPlayer(Player player) {
+        for(Room room: roomList) {
+            if(room.getPlayerList().contains(player)){
+                return room;
+            }
+        }
+        return null;
+    }
 }
