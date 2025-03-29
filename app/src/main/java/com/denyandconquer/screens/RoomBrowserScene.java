@@ -8,6 +8,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.GridPane;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -74,7 +76,6 @@ public class RoomBrowserScene {
         });
 
         Scene scene = new Scene(grid, 400, 300);
-
         return scene;
     }
 
@@ -99,6 +100,9 @@ public class RoomBrowserScene {
      * @param list the list of available rooms.
      */
     public void updateList(List<Room> list) {
+        if (list == null) {
+            list = new ArrayList<>();
+        }
         roomListView.getItems().clear();
         roomListView.getItems().addAll(list);
 
@@ -114,7 +118,5 @@ public class RoomBrowserScene {
                 }
             }
         });
-
     }
-
 }

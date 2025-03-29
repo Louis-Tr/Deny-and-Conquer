@@ -5,6 +5,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * The RoomManager class creates, removes, and finds game rooms.
+ * It stores a list of rooms.
+ * It ensures thread-safety.
+ */
 public class RoomManager {
     private List<Room> roomList;
     private int RoomID;

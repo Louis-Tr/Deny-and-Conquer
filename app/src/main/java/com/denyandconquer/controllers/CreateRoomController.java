@@ -5,7 +5,10 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 
-
+/**
+ * The CreateRoomController class handles the user input for creating a new game room.
+ * It listens for the create room event and sends a request to the server.
+ */
 public class CreateRoomController {
 
     private TextField nameField;

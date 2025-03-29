@@ -5,6 +5,10 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The GameThread class handles communication between the server and an individual client.
+ * Each player has a dedicated GameThread to process their requests.
+ */
 public class GameThread extends Thread {
     private Player player;
     private int playerNumber;
@@ -15,7 +19,14 @@ public class GameThread extends Thread {
     RoomManager roomManager;
     private volatile boolean running = true;
 
-
+    /**
+     * Initializes the GameThread for a player
+     *
+     * @param socket Client socket for communication
+     * @param playerNumber Unique ID assigned to the player
+     * @param map Shared map of all active game threads
+     * @param roomManager Manages game rooms
+     */
     public GameThread(Socket socket, int playerNumber, Map<Integer, GameThread> map, RoomManager roomManager) {
         this.socket = socket;
         this.playerNumber = playerNumber;
@@ -29,6 +40,7 @@ public class GameThread extends Thread {
             this.threadMap.put(playerNumber, this);
             this.player = new Player(this.playerNumber);
 
+            // Send player info to the client
             sendToClient(player);
         } catch (IOException e) {
             System.out.println("Client thread error");
@@ -36,6 +48,9 @@ public class GameThread extends Thread {
 
     }
 
+    /**
+     * Listens for incoming messages from the client and handles them accordingly.
+     */
     @Override
     public void run() {
         try {
@@ -54,15 +69,23 @@ public class GameThread extends Thread {
         }
     }
 
+    /**
+     * Handles incoming text based messages from the client.
+     * @param message The message received
+     */
     private void handleTextMessage(String message) {
         System.out.println(message);
     }
 
+    /**
+     * Handles game related messages received from the client.
+     * @param message The game related message received
+     */
     private void handleGameMessage(Message message) {
         switch (message.getType()) {
             case CREATE_ROOM -> {requestCreateRoom(message);}
             case JOIN_ROOM -> {requestJoinRoom(message);}
-            case LEAVE_ROOM -> {requestLeaveRoom();}
+            case LEAVE_ROOM -> {requestLeaveRoom(message);}
             case ROOM_LIST -> {requestRoomList(message);}
             case PLAYER_LIST -> {requestPlayerList(message);}
             case START_GAME -> {requestStartGame();}
@@ -72,14 +95,21 @@ public class GameThread extends Thread {
         }
     }
 
-
-
+    /**
+     * Sends a message to all connected clients.
+     * @param msg The message to send
+     */
     private void sendToAll(Object msg) {
         for (GameThread thread: threadMap.values()) {
             thread.sendToClient(msg);
         }
     }
 
+    /**
+     * Sends a message to all players in a specific game room.
+     * @param room The game room
+     * @param msg The message to send
+     */
     private void sendToRoom(Room room, Object msg) {
         for (Player player: room.getPlayerList()) {
             GameThread thread = threadMap.get(player.getPlayerNumber());
@@ -89,10 +119,14 @@ public class GameThread extends Thread {
         }
     }
 
-    public void sendToClient(Object obj) {
+    /**
+     * Sends a message to the client associated with this thread.
+     * @param msg The message to send
+     */
+    public void sendToClient(Object msg) {
         try {
             out.reset();
-            out.writeObject(obj);
+            out.writeObject(msg);
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -101,6 +135,10 @@ public class GameThread extends Thread {
 
     }
 
+    /**
+     * Handles the room creation.
+     * @param message The message containing room creation info
+     */
     private void requestCreateRoom(Message message) {
         // Create new room for the player and send it to the host
         Room newRoom = roomManager.CreateRoom(message.getRoomName(), message.getMaxPlayers());
@@ -113,15 +151,22 @@ public class GameThread extends Thread {
         requestRoomList(newMsg);
     }
 
+    /**
+     * Handles a player's request to join an existing game room.
+     * @param message The message containing the room ID to join
+     */
     private void requestJoinRoom(Message message) {
+        // Find the room the player wants to join
         int roomId = (int) message.getData();
         Room joinRoom = roomManager.getRoomByID(roomId);
+
         if (joinRoom != null && !joinRoom.isFull()){
+            // Add the player to the room
             joinRoom.addPlayer(player);
             Message msg = new Message(Message.Type.ENTER_ROOM, joinRoom);
             sendToClient(msg);
 
-            // Notify player list update to clients in the room
+            // Notify players in the room about the new player
             msg = new Message(Message.Type.PLAYER_LIST, joinRoom.getPlayerList());
             sendToRoom(joinRoom, msg);
         } else if (joinRoom == null) {
@@ -129,32 +174,47 @@ public class GameThread extends Thread {
         } else{
             System.out.println("[Server] Room is full");
         }
-
     }
 
-    private void requestLeaveRoom() {
+    /**
+     * Handles a player's request to leave a room.
+     * @param message The message containing the Room ID to leave
+     */
+    private void requestLeaveRoom(Message message) {
         //1. first find the room the player belongs to
-        Room currentRoom = roomManager.findRoomByPlayer(player);
+        int roomId = (int) message.getData();
+        Room currentRoom = roomManager.getRoomByID(roomId);
+
         if(currentRoom != null){
             //2. Remove the player from the room
-
             currentRoom.removePlayer(player);
 
-            Message msg = new Message(Message.Type.PLAYER_LIST, currentRoom.getPlayerList());
             //3. Notify the players in the room about the deletion
+            Message msg = new Message(Message.Type.PLAYER_LIST, currentRoom.getPlayerList());
             sendToRoom(currentRoom, msg);
 
             //4. If the room is empty, delete the room.
             if(currentRoom.getPlayerList().isEmpty()){
                 roomManager.removeRoom(currentRoom.getRoomId());
             }
+
+            //5. Notify all clients about the updated room list
             Message newMsg = new Message(Message.Type.ROOM_LIST, true);
             requestRoomList(newMsg);
+
+            //6. Send message to client to update the UI
+            Message leaveMsg = new Message(Message.Type.LEAVE_ROOM, null);
+            sendToClient(leaveMsg);
         }
         else {
             System.out.println("[Server] Empty Room");
         }
     }
+
+    /**
+     * Handles a request for the list of available game rooms.
+     * @param message The message containing info about broadcast
+     */
     private void requestRoomList(Message message) {
         List<Room> list = roomManager.getRoomList();
         Message msg = new Message(Message.Type.ROOM_LIST, list);
@@ -165,6 +225,8 @@ public class GameThread extends Thread {
             sendToClient(msg);
         }
     }
+
+
     private void requestPlayerList(Message msg) {
 
     }
@@ -185,15 +247,24 @@ public class GameThread extends Thread {
 
     }
 
+    /**
+     * Returns the player associated with this thread.
+     */
     public Player getPlayer() {
         return player;
     }
 
+    /**
+     * Stops the game thread and calls cleanup.
+     */
     public void stopThread() {
         running = false;
         cleanup();
     }
 
+    /**
+     * Cleans up resources and removes the thread from the thread map.
+     */
     private void cleanup() {
         synchronized (threadMap) {
             if (!threadMap.containsKey(playerNumber)){
@@ -214,5 +285,4 @@ public class GameThread extends Thread {
             System.out.println("[Server] Cleanup error for " + player.getName() + ": " + e.getMessage());
         }
     }
-
 }

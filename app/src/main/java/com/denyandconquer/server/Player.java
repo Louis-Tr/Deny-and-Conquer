@@ -1,6 +1,12 @@
 package com.denyandconquer.server;
 
 import java.io.Serializable;
+
+/**
+ * The Player class represents a player in the game.
+ * It contains the player's name and unique player number.
+ * It is serializable.
+ */
 public class Player implements Serializable {
     private String name;
     private int playerNumber;
