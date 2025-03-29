@@ -61,7 +61,7 @@ public class Launcher extends Application {
         LoadingManager.loadingProperty().addListener((obs, oldValue, newValue) -> {
             if (!newValue) { // When loading completes
                 this.roomBrowserScene = new RoomBrowserScene(this);
-                gameClient.sendRoomListRequest();
+                gameClient.sendRoomListRequest(false);
                 primaryStage.setScene(roomBrowserScene.getRoomBrowserScene());
 //                primaryStage.setScene(GameScene.getGameScene());
             }

@@ -58,7 +58,6 @@ public class GameClient extends Thread {
     private void handleGameMessage(Message message) {
         switch (message.getType()) {
             case ENTER_ROOM:
-                System.out.println("Room entered");
                 Room room = (Room) message.getData();
                 GameRoomScene gameRoomScene = new GameRoomScene(launcher, room);
                 launcher.setGameRoomScene(gameRoomScene);
@@ -69,15 +68,14 @@ public class GameClient extends Thread {
                 System.out.println("Left the room");
                 break;
             case ROOM_LIST:
-                System.out.println("Refresh room list");
                 List<Room> roomList = (List<Room>) message.getData();
                 launcher.updateRoomList(roomList);
                 break;
             case PLAYER_LIST:
-                System.out.println("Refresh player list");
                 List<Player> playerList = (List<Player>) message.getData();
-                System.out.println("Received: "+ playerList);
                 launcher.updatePlayerList(playerList);
+                // Request room list to update the number of player in room title
+                sendRoomListRequest(true);
                 break;
             case START_GAME:
                 System.out.println("Game started");
@@ -110,8 +108,8 @@ public class GameClient extends Thread {
         Message msg = new Message(Message.Type.LEAVE_ROOM, null, player);
         send(msg);
     }
-    public void sendRoomListRequest(){
-        Message msg = new Message(Message.Type.ROOM_LIST, null);
+    public void sendRoomListRequest(boolean isBroadcast){
+        Message msg = new Message(Message.Type.ROOM_LIST, isBroadcast);
         send(msg);
     }
     public void sendStartGameRequest() {

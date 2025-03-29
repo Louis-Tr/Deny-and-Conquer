@@ -63,7 +63,7 @@ public class GameThread extends Thread {
             case CREATE_ROOM -> {requestCreateRoom(message);}
             case JOIN_ROOM -> {requestJoinRoom(message);}
             case LEAVE_ROOM -> {requestLeaveRoom();}
-            case ROOM_LIST -> {requestRoomList(false);}
+            case ROOM_LIST -> {requestRoomList(message);}
             case PLAYER_LIST -> {requestPlayerList(message);}
             case START_GAME -> {requestStartGame();}
             case CHECK_SQUARE -> {checkSquare();}
@@ -82,9 +82,6 @@ public class GameThread extends Thread {
 
     private void sendToRoom(Room room, Object msg) {
         for (Player player: room.getPlayerList()) {
-            System.out.println("send to player " + player.getPlayerNumber());
-            List<Player> list = (List<Player>) ((Message)msg).getData();
-            System.out.println("Message: " + list);
             GameThread thread = threadMap.get(player.getPlayerNumber());
             if (thread != null) {
                 thread.sendToClient(msg);
@@ -112,7 +109,8 @@ public class GameThread extends Thread {
         sendToClient(msg);
 
         // Notify room list update to all client
-        requestRoomList(true);
+        Message newMsg = new Message(Message.Type.ROOM_LIST, true);
+        requestRoomList(newMsg);
     }
 
     private void requestJoinRoom(Message message) {
@@ -137,10 +135,10 @@ public class GameThread extends Thread {
     private void requestLeaveRoom() {
 
     }
-    private void requestRoomList(boolean isBroadcast) {
+    private void requestRoomList(Message message) {
         List<Room> list = roomManager.getRoomList();
         Message msg = new Message(Message.Type.ROOM_LIST, list);
-
+        boolean isBroadcast = (boolean) message.getData();
         if (isBroadcast) {
             sendToAll(msg);
         } else{
