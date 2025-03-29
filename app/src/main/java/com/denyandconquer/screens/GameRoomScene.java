@@ -52,6 +52,7 @@ public class GameRoomScene {
         });
 
         leaveRoomButton.setOnAction(e -> {
+            launcher.getGameClient().sendLeaveRoomRequest();
             launcher.setScene(launcher.getRoomBrowserScene());
         });
 

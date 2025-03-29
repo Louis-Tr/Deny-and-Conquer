@@ -147,10 +147,9 @@ public class GameThread extends Thread {
             //4. If the room is empty, delete the room.
             if(currentRoom.getPlayerList().isEmpty()){
                 roomManager.removeRoom(currentRoom.getRoomId());
-                Message newMsg = new Message(Message.Type.ROOM_LIST, true);
-                requestRoomList(newMsg);
             }
-
+            Message newMsg = new Message(Message.Type.ROOM_LIST, true);
+            requestRoomList(newMsg);
         }
         else {
             System.out.println("[Server] Empty Room");

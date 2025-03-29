@@ -64,9 +64,10 @@ public class GameClient extends Thread {
                 launcher.setScene(gameRoomScene.getRoomScene());
                 launcher.updatePlayerList(room.getPlayerList());
                 break;
-            case LEAVE_ROOM:
-                System.out.println("Left the room");
-                break;
+            case LEAVE_ROOM: {
+                System.out.println("[Client] Left the room");
+                launcher.updatePlayerList(List.of());
+            }
             case ROOM_LIST:
                 List<Room> roomList = (List<Room>) message.getData();
                 launcher.updateRoomList(roomList);
