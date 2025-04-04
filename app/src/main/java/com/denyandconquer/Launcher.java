@@ -1,9 +1,8 @@
 package com.denyandconquer;
 
-import com.denyandconquer.common.Player;
-import com.denyandconquer.controllers.GameClientController;
+import com.denyandconquer.client.GameClientController;
 import com.denyandconquer.controllers.SceneController;
-import com.denyandconquer.servers.GameClient;
+import com.denyandconquer.client.GameClient;
 import com.denyandconquer.servers.GameServer;
 import javafx.application.Application;
 import javafx.stage.Stage;

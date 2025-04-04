@@ -173,7 +173,7 @@ public class LobbyScene {
             if (password.isEmpty()) {
                 errorLabel.setText("Password cannot be empty.");
             } else {
-                controller.getLauncher().getClient().sendJoinRoomWithPasswordRequest(room.getRoomId(), password);
+                controller.getLauncher().getClient().sendJoinRoomRequest(room.getRoomId(), password);
                 dialog.close();
             }
         });

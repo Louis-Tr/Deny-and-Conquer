@@ -1,8 +1,7 @@
 package com.denyandconquer.servers;
 
+import com.denyandconquer.common.GameRoom;
 import com.denyandconquer.common.Player;
-import com.denyandconquer.controllers.GameController;
-import com.denyandconquer.common.Square;
 import com.denyandconquer.net.*;
 
 import java.io.*;
@@ -15,7 +14,6 @@ public class GameServer {
     private final LobbyManager lobbyManager = new LobbyManager();
     private final Map<Socket, ClientHandler> clientHandlers = new ConcurrentHashMap<>();
     private ServerSocket serverSocket;
-    private GameController gameController;
 
     public GameServer(int port) {
         this.port = port;
@@ -78,8 +76,9 @@ public class GameServer {
 
         private void handleMessage(Message message) throws IOException {
             switch (message.getType()) {
-                case PLAYER_NAME_SET_REQUEST -> {
+                case JOIN_SERVER -> {
                     String name = (String) message.getData();
+                    System.out.println("🔐 JOIN_SERVER: " + name);
                     if (lobbyManager.registerPlayerName(name)) {
                         player = new Player(name);
                         send(new Message(MessageType.PLAYER_NAME_ACCEPTED, player));
@@ -91,49 +90,54 @@ public class GameServer {
                 }
 
                 case CREATE_ROOM_REQUEST -> {
-                    System.out.println("Create Room Request Receive");
-                    CreateRoomRequest req = (CreateRoomRequest) message.getData();
-                    GameRoom room = lobbyManager.createRoom(req.getRoomName(), req.getMaxPlayers(), req.isPrivate(), req.getPassword());
+                    NavigationRequest req = (NavigationRequest) message.getData();
+                    System.out.println("📦 CREATE_ROOM_REQUEST: " + req.getRoomName());
+
+                    if (lobbyManager.getRoomByName(req.getRoomName()) != null) {
+                        System.out.println("⚠️ Room name already exists: " + req.getRoomName());
+                        send(new Message(MessageType.ROOM_CREATE_FAILED, "Room name already exists"));
+                        return;
+                    }
+
+                    boolean isPrivate = req.hasPassword();
+                    GameRoom room = lobbyManager.createRoom(req.getRoomName(), req.getMaxPlayers(), isPrivate, req.getPassword());
+                    room.addPlayer(player);
                     if (room != null) {
                         currentRoom = room;
-                        GameRoomDTO dtos = new GameRoomDTO(room);
-                        send(new Message(MessageType.ROOM_CREATED, dtos));
+                        send(new Message(MessageType.ROOM_CREATED, new GameRoomDTO(room)));
                         broadcastRoomList();
-                        System.out.println("Create Room Request Success");
+                        System.out.println("✅ Room created: " + room.getRoomName());
                     } else {
-                        send(new Message(MessageType.ROOM_CREATE_FAILED, null));
+                        send(new Message(MessageType.ROOM_CREATE_FAILED, "Unknown error"));
                     }
                 }
 
                 case JOIN_ROOM -> {
-                    JoinRoomRequest req = (JoinRoomRequest) message.getData();
-                    GameRoom room = lobbyManager.getRoom(req.getRoomId());
-                    if (room != null && room.addPlayer(req.getPlayer())) {
-                        currentRoom = room;
-                        GameRoomDTO dtos = new GameRoomDTO(room);
-                        send(new Message(MessageType.ROOM_JOIN_SUCCESS, dtos));
-                        broadcastRoomList();
-                        sendRoomPlayerList(room);
-                    } else {
-                        send(new Message(MessageType.ROOM_JOIN_FAILED, null));
-                    }
-                }
+                    NavigationRequest req = (NavigationRequest) message.getData();
+                    System.out.println("➡️ JOIN_ROOM: " + req.getRoomID());
+                    GameRoom room = lobbyManager.getRoom(req.getRoomID());
 
-                case JOIN_ROOM_WITH_PASSWORD -> {
-                    JoinRoomWithPasswordRequest req = (JoinRoomWithPasswordRequest) message.getData();
-                    GameRoom room = lobbyManager.getRoom(req.getRoomId());
-                    if (room != null && room.checkPassword(req.getPassword()) && room.addPlayer(req.getPlayer())) {
-                        currentRoom = room;
-                        send(new Message(MessageType.ROOM_JOIN_SUCCESS, new GameRoomDTO(room)));
-                        broadcastRoomList();
-                        sendRoomPlayerList(room);
+                    if (room != null) {
+                        boolean correctPassword = !room.isPrivate() || room.checkPassword(req.getPassword());
+                        if (correctPassword && room.addPlayer(player)) {
+                            currentRoom = room;
+                            send(new Message(MessageType.ROOM_JOIN_SUCCESS, new GameRoomDTO(room)));
+                            broadcastRoomList();
+                            sendRoomPlayerList(room);
+                            System.out.println("✅ Joined room: " + room.getRoomName());
+                        } else {
+                            send(new Message(MessageType.ROOM_JOIN_FAILED, null));
+                            System.out.println("❌ Failed to join room: " + room.getRoomName());
+                        }
                     } else {
                         send(new Message(MessageType.ROOM_JOIN_FAILED, null));
+                        System.out.println("❌ Room not found: " + req.getRoomID());
                     }
                 }
 
                 case LEAVE_ROOM -> {
                     if (currentRoom != null) {
+                        System.out.println("🚪 LEAVE_ROOM: " + currentRoom.getRoomName());
                         currentRoom.removePlayer(player);
                         currentRoom = null;
                         broadcastRoomList();
@@ -142,6 +146,7 @@ public class GameServer {
 
                 case START_GAME -> {
                     String roomId = (String) message.getData();
+                    System.out.println("▶️ START_GAME: " + roomId);
                     GameRoom room = lobbyManager.getRoom(roomId);
                     if (room != null && room.equals(currentRoom)) {
                         room.startGame();
@@ -149,35 +154,13 @@ public class GameServer {
                     }
                 }
 
-                case CLICK_ON_TILE -> {
-                    if (currentRoom != null) {
-                        TileClickData data = (TileClickData) message.getData();
-                        currentRoom.getGameController().handlePress(player, data);
-
-                        Square updatedSquare = currentRoom.getGameController().getBoard().getSquare(data.getBoardX(), data.getBoardY());
-                        broadcastToRoom(currentRoom, new Message(MessageType.TILE_UPDATE, updatedSquare));
-                    }
-                }
-
-                case DRAW_ON_TILE -> {
-                    if (currentRoom != null) {
-                        DrawData draw = (DrawData) message.getData();
-                        GameController controller = currentRoom.getGameController();
-                        controller.handleDraw(player, draw);
-
-                        Square updatedSquare = controller.getBoard().getSquare(draw.getBoardX(), draw.getBoardY());
-                        broadcastToRoom(currentRoom, new Message(MessageType.TILE_UPDATE, updatedSquare));
-                    }
-                }
-
-                case RELEASE_TILE -> {
-                    if (currentRoom != null) {
-                        DrawData draw = (DrawData) message.getData();
-                        GameController controller = currentRoom.getGameController();
-                        controller.handleRelease(player, draw);
-
-                        Square updatedSquare = controller.getBoard().getSquare(draw.getBoardX(), draw.getBoardY());
-                        broadcastToRoom(currentRoom, new Message(MessageType.TILE_UPDATE, updatedSquare));
+                case MOUSE_ACTION -> {
+                    MouseData data = (MouseData) message.getData();
+                    boolean changed = currentRoom.getGameController().handleMouseAction(player, data);
+                    System.out.println("🖱️ MOUSE_ACTION by " + player.getName() + ": " + data.getAction());
+                    if (changed) {
+                        data.setPlayer(player);
+                        broadcastToRoom(currentRoom, new Message(MessageType.MOUSE_ACTION, data));
                     }
                 }
 

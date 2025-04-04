@@ -1,17 +1,41 @@
 package com.denyandconquer.common;
 
 import javafx.scene.paint.Color;
+import java.io.Serializable;
 
-public class Player {
+public class Player implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private String name;
-    private Color color;
+    private String colorHex; // hex string like "#FFFFFF"
+    private transient Color color; // not serialized
     private int score;
 
     public Player(String name) {
         this.name = name;
         this.score = 0;
-        this.color = Color.WHITE; // Default color
+        setColor(Color.YELLOW);
+    }
+
+    // --- Color Handling ---
+
+    public Color getColor() {
+        if (color == null && colorHex != null) {
+            color = Color.web(colorHex);
+        }
+        return color;
+    }
+
+    public void setColor(Color color) {
+        this.color = color != null ? color : Color.WHITE;
+        this.colorHex = toHex(this.color);
+    }
+
+    private String toHex(Color c) {
+        return String.format("#%02X%02X%02X",
+                (int) (c.getRed() * 255),
+                (int) (c.getGreen() * 255),
+                (int) (c.getBlue() * 255));
     }
 
     // --- Getters & Setters ---
@@ -22,14 +46,6 @@ public class Player {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
-    public void setColor(Color color) {
-        this.color = color != null ? color : Color.WHITE;
     }
 
     public int getScore() {
@@ -46,7 +62,7 @@ public class Player {
 
     public void reset() {
         resetScore();
-        this.color = Color.WHITE;
+        setColor(Color.WHITE);
     }
 
     @Override

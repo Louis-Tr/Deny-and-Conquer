@@ -3,7 +3,6 @@ package com.denyandconquer.screens;
 import com.denyandconquer.common.Player;
 import com.denyandconquer.controllers.SceneController;
 import com.denyandconquer.net.GameRoomDTO;
-import com.denyandconquer.servers.GameRoom;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -51,11 +50,11 @@ public class GameRoomScene {
 
         // Leave room → notify server
         leaveRoomBtn.setOnAction(e -> {
-            controller.getLauncher().getClient().sendLeaveRoomRequest(room.getRoomId());
+            controller.getLauncher().getClient().sendLeaveRoomRequest();
             controller.showLobbyScene(); // fallback in case no message received
         });
 
-        updateList(room.getPlayerList());
+        updatePlayerList(room.getPlayerList());
 
         return new Scene(grid, 500, 350);
     }
@@ -64,7 +63,7 @@ public class GameRoomScene {
         return scene;
     }
 
-    public void updateList(List<Player> players) {
+    public void updatePlayerList(List<Player> players) {
         playerListView.getItems().setAll(players);
         playerListView.setCellFactory(param -> new ListCell<>() {
             @Override
@@ -75,9 +74,5 @@ public class GameRoomScene {
         });
     }
 
-    public void updatePlayerList(List<Player> players) {
-        playerListView.getItems().clear();
-        playerListView.getItems().addAll(players);
-    }
 
 }

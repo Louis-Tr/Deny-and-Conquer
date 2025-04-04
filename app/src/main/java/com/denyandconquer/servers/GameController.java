@@ -1,13 +1,10 @@
-package com.denyandconquer.controllers;
+package com.denyandconquer.servers;
 
 import com.denyandconquer.common.Board;
 import com.denyandconquer.common.Player;
 import com.denyandconquer.common.Square;
-import com.denyandconquer.net.DrawData;
-import com.denyandconquer.net.TileClickData;
-import com.denyandconquer.servers.GameClient;
-import javafx.geometry.Point2D;
-import javafx.scene.paint.Color;
+import com.denyandconquer.net.MouseData;
+
 
 import java.util.List;
 
@@ -21,6 +18,7 @@ public class GameController {
     private boolean isRunning;
 
     public GameController(List<Player> players) {
+        System.out.println("GameController initialized");
         this.board = new Board();
         this.players = players;
     }
@@ -36,36 +34,36 @@ public class GameController {
     }
 
     /**
-     * Handles drawing by delegating to the square.
+     * Handles mouse actions on the game board.
+     * @param data
      */
-    public void handleDraw(Player player, DrawData data) {
-        Square square = board.getSquare(data.getBoardX(), data.getBoardY());
-        if (square != null) {
-            Point2D p = data.getLocalPosition();
-            square.draw(player, (int) p.getX(), (int) p.getY());
+    public boolean handleMouseAction(Player player, MouseData data) {
+        System.out.println("🖱️ Handling mouse action: " + data.getAction()
+                + " by " + player.getName()
+                + " at square (" + data.getRow() + ", " + data.getCol() + ")"
+                + " local (" + data.getX() + ", " + data.getY() + ")");
+
+        Square square = board.getSquare(data.getRow(), data.getCol());
+        if (square == null) {
+            System.out.println("⚠️ Square is null at row=" + data.getRow() + ", col=" + data.getCol());
+            return false;
         }
+
+        boolean result = switch (data.getAction()) {
+            case PRESS -> board.pressBy(player, data.getRow(), data.getCol());
+            case DRAG -> square.draw(player, data.getX(), data.getY());
+            case RELEASE -> board.release(player);
+            default -> false;
+        };
+
+        if (result) {
+            System.out.println("✅ Square updated");
+        }
+
+        return result;
     }
 
-    /**
-     * Handles releasing the square.
-     */
-    public void handleRelease(Player player, DrawData data) {
-        Square square = board.getSquare(data.getBoardX(), data.getBoardY());
-        if (square != null) {
-            square.release();
-        }
-        winnerCheck();
-    }
 
-    /**
-     * Handles player click to lock a tile.
-     */
-    public void handlePress(Player player, TileClickData data) {
-        Square square = board.getSquare(data.getBoardX(), data.getBoardY());
-        if (square != null) {
-            square.pressBy(player);
-        }
-    }
 
     public void updatePlayerList(List<Player> playerList) {
         for (Player player : playerList) {

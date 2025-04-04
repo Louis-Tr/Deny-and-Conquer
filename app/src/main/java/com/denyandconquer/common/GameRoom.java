@@ -1,8 +1,7 @@
-package com.denyandconquer.servers;
+package com.denyandconquer.common;
 
-import com.denyandconquer.common.Player;
-import com.denyandconquer.controllers.GameController;
-import com.denyandconquer.net.Message;
+import com.denyandconquer.servers.GameController;
+import javafx.scene.paint.Color;
 
 import java.io.Serializable;
 import java.util.*;
@@ -28,6 +27,14 @@ public class GameRoom implements Serializable {
         this.password = isPrivate ? password : null;
         this.gameController = new GameController(playerList);
     }
+
+    private Color getUniqueColor() {
+        // Use distinct hues based on current number of players
+        int index = playerList.size();
+        double hue = (index * 360.0 / maxPlayers) % 360;
+        return Color.hsb(hue, 0.9, 0.9); // Bright, saturated color
+    }
+
 
 
     public String getRoomId() {
@@ -64,6 +71,8 @@ public class GameRoom implements Serializable {
 
     public boolean addPlayer(Player player) {
         if (isFull() || playerList.contains(player) || gameStarted) return false;
+
+        player.setColor(getUniqueColor()); // Assign unique color before adding
         return playerList.add(player);
     }
 
@@ -88,6 +97,18 @@ public class GameRoom implements Serializable {
             this.gameStarted = true;
             this.gameController.updatePlayerList(playerList);
             gameController.startGame();
+        }
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void updatePlayerList(List<Player> players) {
+        for (Player player : players) {
+            if (!playerList.contains(player)) {
+                playerList.add(player);
+            }
         }
     }
 }

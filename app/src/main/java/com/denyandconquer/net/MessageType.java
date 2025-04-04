@@ -27,6 +27,7 @@ public enum MessageType implements Serializable {
 
     // Game actions
     START_GAME,
+    MOUSE_ACTION,
     CLICK_ON_TILE,
     DRAW_ON_TILE,
     RELEASE_TILE,
@@ -36,5 +37,5 @@ public enum MessageType implements Serializable {
 
     // Connection
     DISCONNECT,
-    ERROR
+    JOIN_SERVER, ERROR
 }

@@ -1,12 +1,14 @@
 package com.denyandconquer.controllers;
 
 import com.denyandconquer.Launcher;
+import com.denyandconquer.client.GameClientController;
 import com.denyandconquer.common.Board;
 import com.denyandconquer.common.Player;
 import com.denyandconquer.net.BoardUpdateListener;
 import com.denyandconquer.net.GameRoomDTO;
 import com.denyandconquer.screens.*;
-import com.denyandconquer.servers.GameClient;
+import com.denyandconquer.client.GameClient;
+import com.denyandconquer.common.GameRoom;
 import javafx.stage.Stage;
 import javafx.scene.control.*;
 
@@ -24,6 +26,7 @@ public class SceneController {
     //private GameOverScene gameOverScene;
     private GameScene gameScene;
     private GameClientController gameController;
+    private GameRoom room;
 
     public SceneController(Launcher launcher, Stage stage) {
         this.launcher = launcher;
@@ -85,7 +88,6 @@ public class SceneController {
             lobbyScene.updateList(rooms);
         }
     }
-
 
 
     /**
@@ -161,8 +163,11 @@ public class SceneController {
 
     public void startGame() {
         System.out.println("Starting Game");
-        gameScene = new GameScene(this);
-        stage.setScene(gameScene);
+        if (gameScene == null) {
+            gameScene = new GameScene(this);
+            launcher.getClient().addBoardUpdateListener(gameScene);
+        }
+        stage.setScene(gameScene.getScene());
     }
 
 

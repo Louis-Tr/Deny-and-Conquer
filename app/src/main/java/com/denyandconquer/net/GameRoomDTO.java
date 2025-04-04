@@ -1,7 +1,7 @@
 package com.denyandconquer.net;
 
 import com.denyandconquer.common.Player;
-import com.denyandconquer.servers.GameRoom;
+import com.denyandconquer.common.GameRoom;
 
 import java.io.Serializable;
 import java.util.List;
@@ -17,6 +17,7 @@ public class GameRoomDTO implements Serializable {
     private final int currentPlayers;
     private final boolean gameStarted;
     private final List<Player> playerList;
+    private String password;
 
     public GameRoomDTO(GameRoom room) {
         this.roomId = room.getRoomId();
@@ -26,6 +27,7 @@ public class GameRoomDTO implements Serializable {
         this.currentPlayers = room.getPlayerList().size();
         this.gameStarted = room.hasStarted();
         this.playerList = room.getPlayerList();
+        this.password = room.getPassword();
     }
 
     // Getters
@@ -36,6 +38,7 @@ public class GameRoomDTO implements Serializable {
     public int getCurrentPlayers() { return currentPlayers; }
     public boolean isGameStarted() { return gameStarted; }
     public List<Player> getPlayerList() { return playerList; }
+    public String getPassword() { return password; }
 
     @Override
     public String toString() {

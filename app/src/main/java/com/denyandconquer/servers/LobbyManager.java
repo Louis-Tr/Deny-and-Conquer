@@ -1,5 +1,6 @@
 package com.denyandconquer.servers;
 
+import com.denyandconquer.common.GameRoom;
 import com.denyandconquer.common.Player;
 
 import java.util.*;
@@ -14,6 +15,7 @@ public class LobbyManager {
 
     /** Creates a new game room if name is unique. */
     public GameRoom createRoom(String roomName, int maxPlayers, boolean isPrivate, String password) {
+        System.out.println("Creating room: " + roomName);
         // Prevent duplicate room names
         if (roomMap.values().stream().anyMatch(r -> r.getRoomName().equalsIgnoreCase(roomName))) {
             return null;
@@ -59,6 +61,14 @@ public class LobbyManager {
     /** Get room by ID. */
     public GameRoom getRoom(String roomId) {
         return roomMap.get(roomId);
+    }
+
+    /** Get room by Name. */
+    public GameRoom getRoomByName(String roomName) {
+        return roomMap.values().stream()
+                .filter(room -> room.getRoomName().equalsIgnoreCase(roomName))
+                .findFirst()
+                .orElse(null);
     }
 
     /** Checks if a player name is already taken (globally). */
