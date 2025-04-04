@@ -14,7 +14,7 @@ public class Player implements Serializable {
     public Player(String name) {
         this.name = name;
         this.score = 0;
-        setColor(Color.YELLOW);
+        setColor(Color.RED);
     }
 
     // --- Color Handling ---
