@@ -8,36 +8,45 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
+/**
+ * LoadingScene displays a loading indicator with a customizable message.
+ */
 public class LoadingScene {
 
     /**
-     * Returns a loading scene based on the specified operation with a loading circle.
-     *
-     * @param operation Either "Join Server" or "Create Server"
-     * @return A Scene displaying a loading indicator and a message.
+     * Returns a generic loading scene.
      */
-    public Scene getLoadingScene(String operation) {
+    public Scene getGenericLoadingScene() {
+        return createScene("Loading, please wait...");
+    }
+
+    /**
+     * Returns a loading scene for server creation.
+     */
+    public Scene getServerCreateLoadingScene() {
+        return createScene("Creating server, please wait...");
+    }
+
+    /**
+     * Returns a loading scene for joining a server.
+     */
+    public Scene getJoinServerLoadingScene() {
+        return createScene("Joining server, please wait...");
+    }
+
+    /**
+     * Internal method to create a loading scene with the given message.
+     */
+    private Scene createScene(String message) {
         BorderPane pane = new BorderPane();
         pane.setPadding(new Insets(20));
 
-        // Create a circular progress indicator
         ProgressIndicator progressIndicator = new ProgressIndicator();
         progressIndicator.setPrefSize(50, 50);
-
-        // Determine the loading message based on the operation
-        String message;
-        if ("Join Server".equalsIgnoreCase(operation)) {
-            message = "Joining server, please wait...";
-        } else if ("Create Server".equalsIgnoreCase(operation)) {
-            message = "Creating server, please wait...";
-        } else {
-            message = "Loading, please wait...";
-        }
 
         Label loadingLabel = new Label(message);
         loadingLabel.setFont(new Font(20));
 
-        // Arrange the indicator and label vertically
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(20));
         vbox.setStyle("-fx-alignment: center;");

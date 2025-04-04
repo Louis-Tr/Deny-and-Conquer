@@ -1,30 +1,51 @@
 package com.denyandconquer.common;
 
-import javafx.geometry.Point2D;
+import java.awt.geom.Point2D.Double;
+
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Board {
-    public static final int GRID_SIZE = 1;
-    public Square[][] grid; // 8 x 8 board
-    public int emptySquares; // 64 total squares
+    private static final int SIZE = 8;
+    private final Square[][] grid = new Square[SIZE][SIZE];
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     public Board() {
-        this.grid = new Square[GRID_SIZE][GRID_SIZE];
-        this.emptySquares = GRID_SIZE * GRID_SIZE;
-        for (int row = 0; row < GRID_SIZE; row++) {
-            for (int col = 0; col < GRID_SIZE; col++) {
-                grid[row][col] = new Square(new Point2D(col, row));
+        for (int x = 0; x < SIZE; x++) {
+            for (int y = 0; y < SIZE; y++) {
+                grid[x][y] = new Square(x, y);
             }
         }
     }
 
-    public Boolean isGameComplete() {
-        return emptySquares == 0;
+    /**
+     * Returns the square at (x, y), or null if out of bounds.
+     */
+    public Square getSquare(int x, int y) {
+        lock.readLock().lock();
+        try {
+            if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) return null;
+            return grid[x][y];
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
-    public void decreaseEmptySquares() {
-        emptySquares--;
+    public Square getSquare(Double position) {
+        return getSquare((int) position.getX(), (int) position.getY());
     }
 
+    /**
+     * Returns the board size (width and height).
+     */
+    public int getSize() {
+        return SIZE;
+    }
 
-
+    public void reset() {
+        for (Square[] square : grid) {
+            for (Square each : square) {
+                each.reset();
+            }
+        }
+    }
 }
