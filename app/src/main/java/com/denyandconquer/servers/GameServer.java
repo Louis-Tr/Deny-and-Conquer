@@ -180,6 +180,7 @@ public class GameServer {
 
 
         private void send(Message message) throws IOException {
+            out.reset();
             out.writeObject(message);
             out.flush();
             System.out.println("📤 Sent: " + message.getType());
