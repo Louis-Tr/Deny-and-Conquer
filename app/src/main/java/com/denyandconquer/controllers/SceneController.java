@@ -70,8 +70,8 @@ public class SceneController {
         System.out.println("Showing Lobby Scene");
         if (lobbyScene == null) {
             lobbyScene = new LobbyScene(this);
-            stage.setScene(lobbyScene.getScene());
         }
+        stage.setScene(lobbyScene.getScene());
     }
 
     public void showGameScene() {
