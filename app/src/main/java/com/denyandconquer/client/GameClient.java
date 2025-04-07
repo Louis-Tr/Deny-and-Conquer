@@ -127,7 +127,6 @@ public class GameClient {
     private synchronized void send(Message message) {
         try {
             if (out != null) {
-                out.reset();
                 out.writeObject(message);
                 out.flush();
             }
@@ -161,6 +160,7 @@ public class GameClient {
                 }
             } catch (Exception e) {
                 System.out.println("❌ Disconnected from server.");
+                e.printStackTrace();
                 Platform.runLater(() -> sceneController.handleServerDisconnect());
             }
         }).start();

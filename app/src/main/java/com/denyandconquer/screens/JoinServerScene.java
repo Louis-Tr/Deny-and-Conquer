@@ -47,7 +47,10 @@ public class JoinServerScene {
             }
         });
 
-        backBtn.setOnAction(e -> controller.showMenuScene());
+        backBtn.setOnAction(e -> {
+            errorLabel.setText("");
+            controller.showMenuScene();
+        });
 
         this.scene = new Scene(grid, 400, 300);
     }
