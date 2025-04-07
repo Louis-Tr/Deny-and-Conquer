@@ -102,7 +102,7 @@ public class SceneController {
      * @param nameField The name field
      *
      */
-    public void handleCreateServer(TextField ipField, TextField portField, TextField nameField) {
+    public boolean handleCreateServer(TextField ipField, TextField portField, TextField nameField) {
         System.out.println("Attempting to Create Server");
         LoadingManager.setLoading(true, "create");
         String name = nameField.getText();
@@ -117,11 +117,12 @@ public class SceneController {
             if (launcher.getClient() != null) {
                 showLobbyScene();
                 LoadingManager.setLoading(false);
+                return true;
             }
-        } else {
-            System.out.println("Failed to Create Server");
-            LoadingManager.setLoading(false);
         }
+        System.out.println("Failed to Create Server");
+        LoadingManager.setLoading(false);
+        return false;
     }
 
 

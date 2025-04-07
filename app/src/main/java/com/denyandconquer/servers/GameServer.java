@@ -14,21 +14,32 @@ public class GameServer {
     private final LobbyManager lobbyManager = new LobbyManager();
     private final Map<Socket, ClientHandler> clientHandlers = new ConcurrentHashMap<>();
     private ServerSocket serverSocket;
+    private boolean isStarted = false;
 
     public GameServer(int port) {
         this.port = port;
     }
 
-    public void start() throws IOException {
-        serverSocket = new ServerSocket(port);
-        System.out.println("GameServer started on port " + port);
+    public void start() {
+        try {
+            serverSocket = new ServerSocket(port);
+            isStarted = true;
+            System.out.println("GameServer started on port " + port);
 
-        while (true) {
-            Socket clientSocket = serverSocket.accept();
-            ClientHandler handler = new ClientHandler(clientSocket);
-            clientHandlers.put(clientSocket, handler);
-            new Thread(handler).start();
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                ClientHandler handler = new ClientHandler(clientSocket);
+                clientHandlers.put(clientSocket, handler);
+                new Thread(handler).start();
+            }
+        } catch (SocketException se) {
+            stop();
         }
+        catch (IOException e) {
+            System.err.println("Failed to start server: " + e.getMessage());
+            isStarted = false;
+        }
+
     }
 
     public void stop() {
@@ -40,6 +51,10 @@ public class GameServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean isStarted() {
+        return isStarted;
     }
 
     private class ClientHandler implements Runnable {

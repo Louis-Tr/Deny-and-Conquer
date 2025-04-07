@@ -5,6 +5,7 @@ import com.denyandconquer.controllers.SceneController;
 import com.denyandconquer.client.GameClient;
 import com.denyandconquer.servers.GameServer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 
 public class Launcher extends Application {
@@ -27,6 +28,14 @@ public class Launcher extends Application {
         primaryStage.setTitle("Deny and Conquer");
         primaryStage.show();
         sceneController.showMenuScene();
+
+        primaryStage.setOnCloseRequest(event -> {
+            if (server != null) server.stop();
+//            if (client != null) client.stop();
+
+            Platform.exit();
+            System.exit(0);
+        });
     }
 
     @Override
@@ -41,15 +50,20 @@ public class Launcher extends Application {
      * Starts the local game server on the given port.
      */
     public void startServer(String ip, int port) {
-        System.out.println("Starting server on " + ip + ":" + port);
+//        System.out.println("Starting server on " + ip + ":" + port);
         this.server = new GameServer(port);
-        new Thread(() -> {
-            try {
-                server.start();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
+        Thread serverThread = new Thread(() -> {server.start();});
+        serverThread.start();
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if (!server.isStarted()) {
+            this.server = null;
+        }
     }
 
     /**

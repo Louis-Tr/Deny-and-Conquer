@@ -36,7 +36,12 @@ public class CreateServerScene {
 
         createBtn.setOnAction(e -> {
             if (isValid(ipField, portField, errorLabel)) {
-                controller.handleCreateServer(ipField, portField, nameField);
+                boolean success = controller.handleCreateServer(ipField, portField, nameField);
+                if (!success) {
+                    errorLabel.setText("Use a different port number.");
+                } else {
+                    errorLabel.setText("");
+                }
             }
         });
 
