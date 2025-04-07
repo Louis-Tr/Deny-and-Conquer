@@ -195,7 +195,9 @@ public class GameServer {
 
 
         private void send(Message message) throws IOException {
-            out.reset();
+            if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE) {
+                out.reset();
+            }
             out.writeObject(message);
             out.flush();
             System.out.println("📤 Sent: " + message.getType());
