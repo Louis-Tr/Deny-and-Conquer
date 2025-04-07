@@ -38,7 +38,12 @@ public class JoinServerScene {
 
         joinBtn.setOnAction(e -> {
             if (isValid(nameField, ipField, portField, errorLabel)) {
-                controller.handleJoinServer(ipField, portField, nameField);
+                boolean success = controller.handleJoinServer(ipField, portField, nameField);
+                if (!success) {
+                    errorLabel.setText("Connection refuse.");
+                } else {
+                    errorLabel.setText("");
+                }
             }
         });
 

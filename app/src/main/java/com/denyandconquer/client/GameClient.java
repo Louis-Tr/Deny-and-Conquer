@@ -10,6 +10,7 @@ import javafx.application.Platform;
 import javafx.scene.input.MouseEvent;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,7 @@ public class GameClient {
     /**
      * Connects to the server and sets up streams.
      */
-    public void connectToServer(String ip, int port, String name) {
+    public boolean connectToServer(String ip, int port, String name) {
         try {
             socket = new Socket(ip, port);
             out = new ObjectOutputStream(socket.getOutputStream());
@@ -52,9 +53,13 @@ public class GameClient {
 
             // Start listener thread
             startListening();
+            return true;
+        } catch (ConnectException ce) {
+            System.out.println("🔴 Connection refused. Is the server running?");
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     /**
@@ -155,8 +160,8 @@ public class GameClient {
                     handleServerMessage(message);
                 }
             } catch (Exception e) {
-                System.out.println("Disconnected from server.");
-                e.printStackTrace();
+                System.out.println("❌ Disconnected from server.");
+                Platform.runLater(() -> sceneController.handleServerDisconnect());
             }
         }).start();
     }

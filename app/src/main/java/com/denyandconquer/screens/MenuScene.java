@@ -4,6 +4,7 @@ import com.denyandconquer.controllers.SceneController;
 
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 
@@ -45,5 +46,12 @@ public class MenuScene {
      */
     public Scene getScene() {
         return scene;
+    }
+
+    public void showErrorDialog() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Connection Error");
+        alert.setContentText("Disconnected from server.");
+        alert.showAndWait();
     }
 }

@@ -71,7 +71,11 @@ public class Launcher extends Application {
      */
     public void connectClient(String ip, int port, String playerName) {
         this.client = new GameClient(this.sceneController);
-        client.connectToServer(ip, port, playerName);
+        boolean success = client.connectToServer(ip, port, playerName);
+
+        if (!success) {
+           this.client = null;
+        }
     }
 
     public GameServer getServer() {

@@ -127,7 +127,7 @@ public class SceneController {
 
 
 
-    public void handleJoinServer(TextField ipField, TextField portField, TextField nameField) {
+    public boolean handleJoinServer(TextField ipField, TextField portField, TextField nameField) {
         System.out.println("Attempting to Join Server");
         LoadingManager.setLoading(true, "join");
         String name = nameField.getText().trim();
@@ -139,11 +139,16 @@ public class SceneController {
         if (launcher.getClient() != null) {
             showLobbyScene();
             LoadingManager.setLoading(false);
+            return true;
         }
-        else {
-            System.out.println("Failed to Join Server");
-            LoadingManager.setLoading(false);
-        }
+        System.out.println("Failed to Join Server");
+        LoadingManager.setLoading(false);
+        return false;
+    }
+
+    public void handleServerDisconnect() {
+        showMenuScene();
+        menuScene.showErrorDialog();
     }
 
     public Launcher getLauncher() {
