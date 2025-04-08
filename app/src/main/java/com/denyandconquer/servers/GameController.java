@@ -38,28 +38,24 @@ public class GameController {
      * @param data
      */
     public boolean handleMouseAction(Player player, MouseData data) {
-        System.out.println("🖱️ Handling mouse action: " + data.getAction()
-                + " by " + player.getName()
-                + " at square (" + data.getRow() + ", " + data.getCol() + ")"
-                + " local (" + data.getX() + ", " + data.getY() + ")");
-
         Square square = board.getSquare(data.getRow(), data.getCol());
-        if (square == null) {
-            System.out.println("⚠️ Square is null at row=" + data.getRow() + ", col=" + data.getCol());
-            return false;
+        if (square == null) return false;
+        boolean result = false;
+        switch (data.getAction()) {
+            case PRESS -> result = board.pressBy(player, data.getRow(), data.getCol());
+            case DRAG -> result = square.draw(player, data.getX(), data.getY());
+            case RELEASE -> {
+                result = board.release(player);
+                // RELEASE 후에 게임 종료 조건을 체크함
+                if (result && winnerCheck()) {
+                    System.out.println("Game Over detected. Winner: " + winner.getName());
+                }
+            }
+            default -> result = false;
         }
-
-        boolean result = switch (data.getAction()) {
-            case PRESS -> board.pressBy(player, data.getRow(), data.getCol());
-            case DRAG -> square.draw(player, data.getX(), data.getY());
-            case RELEASE -> board.release(player);
-            default -> false;
-        };
-
         if (result) {
             System.out.println("✅ Square updated");
         }
-
         return result;
     }
 
@@ -73,7 +69,7 @@ public class GameController {
         }
     }
 
-    public void winnerCheck() {
+    public boolean winnerCheck() {
         int remainingTiles = 0;
         for (int x = 0; x < board.getSize(); x++) {
             for (int y = 0; y < board.getSize(); y++) {
@@ -82,25 +78,23 @@ public class GameController {
                 }
             }
         }
-
         for (Player player : players) {
             int maxOtherScore = players.stream()
                     .filter(p -> p != player)
                     .mapToInt(Player::getScore)
                     .max()
                     .orElse(0);
-
-            // If player has a lead greater than all other players + all remaining tiles
             if (player.getScore() > maxOtherScore + remainingTiles) {
                 winner = player;
                 gameEnd();
-                break;
+                return true;
             }
         }
-
         if (remainingTiles == 0) {
             gameEnd();
+            return true;
         }
+        return false;
     }
 
     private void gameEnd() {

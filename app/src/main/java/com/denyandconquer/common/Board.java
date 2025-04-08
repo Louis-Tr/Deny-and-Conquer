@@ -74,10 +74,27 @@ public class Board {
     }
 
 
-    public boolean release(Player player) {
-        for (Square[] square : grid) {
-            for (Square each : square) {
-                if(each.getLockedBy() == player) {
+    public synchronized boolean pressBy(Player player, int row, int col) {
+        for (Square[] squareRow : grid) {
+            for (Square each : squareRow) {
+                if (each.getLockedBy() == player) {
+                    return false;
+                }
+            }
+        }
+        Square square = getSquare(row, col);
+        if (square != null && !square.isLock()) {
+            square.pressBy(player);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public synchronized boolean release(Player player) {
+        for (Square[] squareRow : grid) {
+            for (Square each : squareRow) {
+                if (each.getLockedBy() == player) {
                     return each.release(player);
                 }
             }
@@ -85,20 +102,4 @@ public class Board {
         return false;
     }
 
-    public boolean pressBy(Player player, int row, int col) {
-        for (Square[] square : grid) {
-            for (Square each : square) {
-                if (each.getLockedBy() == player) {
-                    return false;
-                }
-            }
-        }
-        Square square = getSquare(row, col);
-        if (!square.isLock()) {
-            square.pressBy(player);
-            return true;
-        } else {
-            return false;
-        }
-    }
 }

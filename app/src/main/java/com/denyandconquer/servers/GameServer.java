@@ -80,7 +80,6 @@ public class GameServer {
                     System.out.println("📩 Received: " + message.getType());
                     handleMessage(message);
                 }
-
             } catch (Exception e) {
                 System.out.println("🔴 Client handler crashed: " + e.getMessage());
                 e.printStackTrace();
@@ -176,6 +175,10 @@ public class GameServer {
                     if (changed) {
                         data.setPlayer(player);
                         broadcastToRoom(currentRoom, new Message(MessageType.MOUSE_ACTION, data));
+                    }
+                    if (data.getAction() == MouseAction.RELEASE &&
+                            currentRoom.getGameController().getWinner() != null) {
+                        broadcastToRoom(currentRoom, new Message(MessageType.GAME_OVER, currentRoom.getGameController().getWinner()));
                     }
                 }
 

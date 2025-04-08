@@ -34,7 +34,7 @@ public class Square {
     }
 
     // --- Game Actions ---
-    public boolean pressBy(Player player) {
+    public synchronized boolean pressBy(Player player) {
         if (lockedBy == null && ownedBy == null) {
             System.out.println("Square pressed by " + player.getName());
             lock(player);
@@ -44,7 +44,7 @@ public class Square {
         return false;
     }
 
-    public boolean draw(Player player, double x, double y) {
+    public synchronized boolean draw(Player player, double x, double y) {
         System.out.println("Square drawn by " + player.getName() + " at (" + x + ", " + y + ")");
         if (lockedBy != player) return false;
 
@@ -72,7 +72,7 @@ public class Square {
 
 
 
-    public boolean release(Player player) {
+    public synchronized boolean release(Player player) {
         if (lockedBy == player) {
             lastDrawnPoint = null;
 
@@ -97,7 +97,7 @@ public class Square {
     }
 
 
-    public void reset() {
+    public synchronized void reset() {
         lockedBy = null;
         ownedBy = null;
         isLocked = false;
