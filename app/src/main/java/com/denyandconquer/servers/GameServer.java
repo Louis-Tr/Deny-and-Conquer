@@ -177,6 +177,10 @@ public class GameServer {
                         data.setPlayer(player);
                         broadcastToRoom(currentRoom, new Message(MessageType.MOUSE_ACTION, data));
                     }
+                    if (data.getAction() == MouseAction.RELEASE &&
+                            currentRoom.getGameController().getWinner() != null) {
+                        broadcastToRoom(currentRoom, new Message(MessageType.GAME_OVER, currentRoom.getGameController().getWinner()));
+                    }
                 }
 
                 case DISCONNECT -> disconnect();
