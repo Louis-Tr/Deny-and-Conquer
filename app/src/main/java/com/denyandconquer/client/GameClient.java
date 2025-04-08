@@ -12,6 +12,7 @@ import javafx.scene.input.MouseEvent;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -158,9 +159,14 @@ public class GameClient {
                     Message message = (Message) in.readObject();
                     handleServerMessage(message);
                 }
-            } catch (Exception e) {
-                System.out.println("❌ Disconnected from server.");
+            } catch (EOFException efo) {
+                System.out.println("🔌 Server closed the connection.");
+            } catch (SocketException se){
+                System.out.println("🔌 Connection error: " + se.getMessage());
+            }catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                disconnect();
                 Platform.runLater(() -> sceneController.handleServerDisconnect());
             }
         }).start();
@@ -236,7 +242,16 @@ public class GameClient {
         }
     }
 
-
+    public void disconnect() {
+        try {
+            if (socket != null) socket.close();
+            if (in != null) in.close();
+            if (out != null) out.close();
+            System.out.println("🔌 Disconnected from server.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 

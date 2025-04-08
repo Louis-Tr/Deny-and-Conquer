@@ -185,22 +185,21 @@ public class GameServer {
 
         private void broadcastToAll(Message message) {
             for (ClientHandler handler : clientHandlers.values()) {
-                try {
-                    handler.send(message);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                handler.send(message);
             }
         }
 
-
-        private void send(Message message) throws IOException {
-            if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE) {
-                out.reset();
+        private void send(Message message) {
+            try {
+                if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE) {
+                    out.reset();
+                }
+                out.writeObject(message);
+                out.flush();
+                System.out.println("📤 Sent: " + message.getType());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            out.writeObject(message);
-            out.flush();
-            System.out.println("📤 Sent: " + message.getType());
         }
 
         private void sendRoomPlayerList(GameRoom room) {
@@ -209,11 +208,7 @@ public class GameServer {
 
             for (ClientHandler handler : clientHandlers.values()) {
                 if (handler.currentRoom != null && handler.currentRoom.equals(room)) {
-                    try {
-                        handler.send(message);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    handler.send(message);
                 }
             }
         }
@@ -228,25 +223,17 @@ public class GameServer {
 
             for (ClientHandler handler : clientHandlers.values()) {
                 if (handler.player != null) {
-                    try {
-                        handler.send(new Message(MessageType.PLAYER_SERVER_LIST_UPDATE, players));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    handler.send(new Message(MessageType.PLAYER_SERVER_LIST_UPDATE, players));
                 }
             }
         }
 
         private void sendRoomList(ClientHandler handler) {
-            try {
-                List<GameRoomDTO> dtoList = lobbyManager.getAllRooms()
-                        .stream()
-                        .map(GameRoomDTO::new)
-                        .toList();
-                handler.send(new Message(MessageType.ROOM_LIST_UPDATE, dtoList));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            List<GameRoomDTO> dtoList = lobbyManager.getAllRooms()
+                    .stream()
+                    .map(GameRoomDTO::new)
+                    .toList();
+            handler.send(new Message(MessageType.ROOM_LIST_UPDATE, dtoList));
         }
 
         private void broadcastRoomList() {
@@ -258,11 +245,7 @@ public class GameServer {
             Message roomListMessage = new Message(MessageType.ROOM_LIST_UPDATE, dtoList);
 
             for (ClientHandler handler : clientHandlers.values()) {
-                try {
-                    handler.send(roomListMessage);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                handler.send(roomListMessage);
             }
         }
 
@@ -270,11 +253,7 @@ public class GameServer {
         private void broadcastToRoom(GameRoom room, Message message) {
             for (ClientHandler handler : clientHandlers.values()) {
                 if (handler.currentRoom != null && handler.currentRoom.equals(room)) {
-                    try {
-                        handler.send(message);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    handler.send(message);
                 }
             }
         }
