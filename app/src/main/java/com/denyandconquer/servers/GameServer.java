@@ -198,8 +198,7 @@ public class GameServer {
                 out.flush();
                 System.out.println("📤 Sent: " + message.getType());
             } catch (IOException e) {
-                System.out.println("❌ Cannot send message.");
-                disconnect();
+                e.printStackTrace();
             }
         }
 
