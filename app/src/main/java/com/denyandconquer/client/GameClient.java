@@ -132,7 +132,8 @@ public class GameClient {
                 out.flush();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("❌ [Client] Cannot send message: " + e.getMessage());
+            disconnect();
         }
     }
 
@@ -160,9 +161,9 @@ public class GameClient {
                     handleServerMessage(message);
                 }
             } catch (EOFException efo) {
-                System.out.println("🔌 Server closed the connection.");
+                System.out.println("🔴 Server closed the connection.");
             } catch (SocketException se){
-                System.out.println("🔌 Connection error: " + se.getMessage());
+                System.out.println("🔴 Connection error: " + se.getMessage());
             }catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -244,10 +245,11 @@ public class GameClient {
 
     public void disconnect() {
         try {
-            if (socket != null) socket.close();
+            if (socket != null && !socket.isClosed()) socket.close();
             if (in != null) in.close();
             if (out != null) out.close();
-            System.out.println("🔌 Disconnected from server.");
+
+            System.out.println("🔴 Disconnected from server.");
         } catch (IOException e) {
             e.printStackTrace();
         }

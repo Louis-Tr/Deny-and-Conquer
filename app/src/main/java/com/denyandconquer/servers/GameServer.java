@@ -80,10 +80,10 @@ public class GameServer {
                     System.out.println("📩 Received: " + message.getType());
                     handleMessage(message);
                 }
-
+            } catch (EOFException eofe) {
+                System.out.println("🔴 Client disconnected unexpectedly: " + eofe.getMessage());
             } catch (Exception e) {
                 System.out.println("🔴 Client handler crashed: " + e.getMessage());
-                e.printStackTrace();
             } finally {
                 disconnect();
             }
@@ -198,7 +198,9 @@ public class GameServer {
                 out.flush();
                 System.out.println("📤 Sent: " + message.getType());
             } catch (IOException e) {
+                System.out.println("❌ [Server] Cannot send message: " + e.getMessage());
                 e.printStackTrace();
+                disconnect();
             }
         }
 
@@ -260,6 +262,10 @@ public class GameServer {
 
         private void disconnect() {
             try {
+                synchronized (clientHandlers) {
+                    clientHandlers.remove(socket);
+                }
+
                 if (player != null) {
                     lobbyManager.unregisterPlayerName(player.getName());
                     broadCastServerPlayerList();
@@ -270,8 +276,10 @@ public class GameServer {
                     broadcastRoomList();
                 }
 
-                clientHandlers.remove(socket);
-                socket.close();
+                if (socket != null && !socket.isClosed()) socket.close();
+                if (in != null) in.close();
+                if (out != null) out.close();
+
                 System.out.println("🔴 Client disconnected: " + socket.getRemoteSocketAddress());
             } catch (IOException e) {
                 e.printStackTrace();
