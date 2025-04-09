@@ -140,14 +140,17 @@ public class GameClient {
                 dragScheduler = createDragScheduler(data);
                 dragScheduler.play();
             }
-        } else if (action == MouseAction.RELEASE) {
-            // Stop drag updates when mouse is released
-            if (dragScheduler != null) {
-                dragScheduler.stop();
+        } else {
+            if (action == MouseAction.RELEASE) {
+                // Stop drag updates when mouse is released
+                if (dragScheduler != null) {
+                    dragScheduler.stop();
+                }
             }
+            send(new Message(MessageType.MOUSE_ACTION, data));
         }
 
-        send(new Message(MessageType.MOUSE_ACTION, data));
+
     }
 
 
