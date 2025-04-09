@@ -10,6 +10,7 @@ import java.util.List;
  * Serializable data-only version of GameRoom for client use.
  */
 public class GameRoomDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final String roomId;
     private final String roomName;
     private final boolean isPrivate;

@@ -5,7 +5,6 @@ import java.io.Serializable;
 
 public class Player implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private String name;
     private String colorHex; // hex string like "#FFFFFF"
     private transient Color color; // not serialized

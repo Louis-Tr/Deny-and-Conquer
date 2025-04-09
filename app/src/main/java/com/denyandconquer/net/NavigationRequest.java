@@ -3,6 +3,7 @@ package com.denyandconquer.net;
 import java.io.Serializable;
 
 public class NavigationRequest implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final String roomID;
     private final String password;
     private final int maxPlayers;
