@@ -10,6 +10,7 @@ import java.util.*;
  * Represents a multiplayer game room with player list, settings, and game state.
  */
 public class GameRoom implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final String roomId;
     private final String roomName;
     private final boolean isPrivate;
