@@ -6,8 +6,11 @@ import com.denyandconquer.common.Square;
 import com.denyandconquer.controllers.SceneController;
 import com.denyandconquer.net.*;
 
+import javafx.animation.KeyFrame;
 import javafx.application.Platform;
 import javafx.scene.input.MouseEvent;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 
 import java.io.*;
 import java.net.ConnectException;
@@ -27,6 +30,7 @@ public class GameClient {
     private GameClientController gameController;
     private SceneController sceneController;
     private final List<BoardUpdateListener> listeners = new ArrayList<>();
+    private Timeline dragScheduler;
 
 
     public void addBoardUpdateListener(BoardUpdateListener listener) {
@@ -61,6 +65,18 @@ public class GameClient {
             e.printStackTrace();
         }
         return false;
+    }
+
+    /**
+     * Creates a Timeline to send drag updates
+     * @param data
+     * @return
+     */
+    private Timeline createDragScheduler (MouseData data) {
+        KeyFrame keyFrame = new KeyFrame(Duration.millis(100), event -> {
+            send(new Message(MessageType.MOUSE_ACTION, data));
+        });
+        return new Timeline(keyFrame);
     }
 
     /**
@@ -117,6 +133,20 @@ public class GameClient {
         double y = absoluteY % Square.HEIGHT;
 
         MouseData data = new MouseData(row, col, x, y, action);
+
+        // For dragging, send updates periodically using TimeLine
+        if (action == MouseAction.DRAG) {
+            if (dragScheduler == null || dragScheduler.getStatus() == Timeline.Status.STOPPED) {
+                dragScheduler = createDragScheduler(data);
+                dragScheduler.play();
+            }
+        } else if (action == MouseAction.RELEASE) {
+            // Stop drag updates when mouse is released
+            if (dragScheduler != null) {
+                dragScheduler.stop();
+            }
+        }
+
         send(new Message(MessageType.MOUSE_ACTION, data));
     }
 
