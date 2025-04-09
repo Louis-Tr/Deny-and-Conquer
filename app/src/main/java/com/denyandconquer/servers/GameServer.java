@@ -2,6 +2,7 @@ package com.denyandconquer.servers;
 
 import com.denyandconquer.common.GameRoom;
 import com.denyandconquer.common.Player;
+import com.denyandconquer.common.Square;
 import com.denyandconquer.net.*;
 
 import java.io.*;
@@ -121,6 +122,7 @@ public class GameServer {
                         currentRoom = room;
                         send(new Message(MessageType.ROOM_CREATED, new GameRoomDTO(room)));
                         broadcastRoomList();
+                        send(new Message(MessageType.PLAYER_COLOR_CHANGED, player));
                         System.out.println("✅ Room created: " + room.getRoomName());
                     } else {
                         send(new Message(MessageType.ROOM_CREATE_FAILED, "Unknown error"));
@@ -139,6 +141,7 @@ public class GameServer {
                             send(new Message(MessageType.ROOM_JOIN_SUCCESS, new GameRoomDTO(room)));
                             broadcastRoomList();
                             sendRoomPlayerList(room);
+                            send(new Message(MessageType.PLAYER_COLOR_CHANGED, player));
                             System.out.println("✅ Joined room: " + room.getRoomName());
                         } else {
                             send(new Message(MessageType.ROOM_JOIN_FAILED, null));
@@ -173,14 +176,36 @@ public class GameServer {
                     MouseData data = (MouseData) message.getData();
                     boolean changed = currentRoom.getGameController().handleMouseAction(player, data);
                     System.out.println("🖱️ MOUSE_ACTION by " + player.getName() + ": " + data.getAction());
-                    if (changed) {
-                        data.setPlayer(player);
+                    MouseAction action = data.getAction();
+                    data.setPlayer(player);
+
+                    // Press action
+                    if (changed && (action == MouseAction.PRESS)) {
                         broadcastToRoom(currentRoom, new Message(MessageType.MOUSE_ACTION, data));
                     }
-                    if (data.getAction() == MouseAction.RELEASE &&
-                            currentRoom.getGameController().getWinner() != null) {
-                        broadcastToRoom(currentRoom, new Message(MessageType.GAME_OVER, currentRoom.getGameController().getWinner()));
+
+                    // Drag action
+                    if (changed && (action == MouseAction.DRAG)) {
+                        send(new Message(MessageType.MOUSE_ACTION, data));
                     }
+
+                    // Release action
+                    if (changed && (action == MouseAction.RELEASE)) {
+                        Square square = currentRoom.getGameController().getBoard().getSquare(data.getRow(), data.getCol());
+                        Player owner = square.getOwnedBy();
+
+                        if (owner == null){
+                            data.setFilled(false);
+                        } else {
+                            data.setFilled(true);
+                        }
+                        broadcastToRoom(currentRoom, new Message(MessageType.MOUSE_ACTION, data));
+
+                        if (currentRoom.getGameController().getWinner() != null) {
+                            broadcastToRoom(currentRoom, new Message(MessageType.GAME_OVER, currentRoom.getGameController().getWinner()));
+                        }
+                    }
+
                 }
 
                 case DISCONNECT -> disconnect();
@@ -195,7 +220,7 @@ public class GameServer {
 
         private void send(Message message) {
             try {
-                if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE) {
+                if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE || message.getType() == MessageType.PLAYER_COLOR_CHANGED) {
                     out.reset();
                 }
                 out.writeObject(message);

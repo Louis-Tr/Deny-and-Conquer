@@ -34,11 +34,12 @@ public class Square {
     }
 
     // --- Game Actions ---
-    public synchronized boolean pressBy(Player player) {
+    public synchronized boolean pressBy(Player player, boolean samePlayer) {
         if (lockedBy == null && ownedBy == null) {
             System.out.println("Square pressed by " + player.getName());
             lock(player);
             this.isLocked = true;
+            if (!samePlayer) drawX(player);
             return true;
         }
         return false;
@@ -70,18 +71,27 @@ public class Square {
         return drew;
     }
 
+    public void drawX(Player player) {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.setStroke(player.getColor());
+        gc.setLineWidth(5);
+
+        // Draw from top-left to bottom-right
+        gc.strokeLine(0, 0, WIDTH, HEIGHT);
+
+        // Draw from top-right to bottom-left
+        gc.strokeLine(WIDTH, 0, 0, HEIGHT);
+    }
 
 
-    public synchronized boolean release(Player player) {
+
+    public synchronized boolean release(Player player, boolean isFilled) {
         if (lockedBy == player) {
             lastDrawnPoint = null;
 
-            if (calculateFillPercentage() >= FILL_THRESHOLD) {
-                ownedBy = lockedBy;
-                lockedBy = null;
-                baseColor = ownedBy.getColor();
-                fillCanvas(baseColor);
-                player.incrementScore();
+            if (calculateFillPercentage() >= FILL_THRESHOLD || isFilled) {
+                System.out.println("Square is filled: " + isFilled);
+                fillCanvas(player);
             } else {
                 reset();
             }
@@ -133,9 +143,14 @@ public class Square {
     }
 
 
-    private void fillCanvas(Color color) {
+    public void fillCanvas(Player player) {
+        ownedBy = player;
+        lockedBy = null;
+        baseColor = ownedBy.getColor();
+        player.incrementScore();
+
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.setFill(color);
+        gc.setFill(baseColor);
         gc.fillRect(0, 0, WIDTH, HEIGHT);
 
         drawBorder(gc);

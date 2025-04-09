@@ -42,10 +42,10 @@ public class GameController {
         if (square == null) return false;
         boolean result = false;
         switch (data.getAction()) {
-            case PRESS -> result = board.pressBy(player, data.getRow(), data.getCol());
+            case PRESS -> result = board.pressBy(player, data.getRow(), data.getCol(), false);
             case DRAG -> result = square.draw(player, data.getX(), data.getY());
             case RELEASE -> {
-                result = board.release(player);
+                result = board.release(player, data.isFilled());
                 // RELEASE 후에 게임 종료 조건을 체크함
                 if (result && winnerCheck()) {
                     System.out.println("Game Over detected. Winner: " + winner.getName());

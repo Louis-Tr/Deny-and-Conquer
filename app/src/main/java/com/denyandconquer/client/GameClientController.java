@@ -52,13 +52,17 @@ public class GameClientController {
 
         switch (data.getAction()) {
             case PRESS -> {
-                return board.pressBy(player, data.getRow(), data.getCol());
+                System.out.println("[Client] player color: " + player.getColorHex());
+                System.out.println("[Client] local player color: " + localPlayer.getColorHex());
+                boolean samePlayer = player.getColorHex().equals(localPlayer.getColorHex());
+                System.out.println("Same? - " + samePlayer);
+                return board.pressBy(player, data.getRow(), data.getCol(), samePlayer);
             }
             case DRAG -> {
                 return square.draw(player, data.getX(), data.getY());
             }
             case RELEASE -> {
-                return board.release(player);
+                return board.release(player, data.isFilled());
             }
             default -> {
                 return false;

@@ -74,7 +74,7 @@ public class Board {
     }
 
 
-    public synchronized boolean pressBy(Player player, int row, int col) {
+    public synchronized boolean pressBy(Player player, int row, int col, boolean samePlayer) {
         for (Square[] squareRow : grid) {
             for (Square each : squareRow) {
                 if (each.getLockedBy() == player) {
@@ -84,18 +84,18 @@ public class Board {
         }
         Square square = getSquare(row, col);
         if (square != null && !square.isLock()) {
-            square.pressBy(player);
+            square.pressBy(player, samePlayer);
             return true;
         } else {
             return false;
         }
     }
 
-    public synchronized boolean release(Player player) {
+    public synchronized boolean release(Player player, boolean isFilled) {
         for (Square[] squareRow : grid) {
             for (Square each : squareRow) {
                 if (each.getLockedBy() == player) {
-                    return each.release(player);
+                    return each.release(player, isFilled);
                 }
             }
         }

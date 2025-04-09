@@ -26,7 +26,7 @@ public class GameScene extends Scene implements BoardUpdateListener {
     private final VBox playerListBox = new VBox(0);
 
     public GameScene(SceneController sceneController) {
-        super(new BorderPane(), 1000, 800);
+        super(new BorderPane(), 550, 450);
         this.sceneController = sceneController;
         this.controller = sceneController.getGameController();
 

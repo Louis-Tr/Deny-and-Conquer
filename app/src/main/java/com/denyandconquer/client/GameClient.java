@@ -6,11 +6,9 @@ import com.denyandconquer.common.Square;
 import com.denyandconquer.controllers.SceneController;
 import com.denyandconquer.net.*;
 
-import javafx.animation.KeyFrame;
 import javafx.application.Platform;
 import javafx.scene.input.MouseEvent;
-import javafx.animation.Timeline;
-import javafx.util.Duration;
+import javafx.scene.paint.Color;
 
 import java.io.*;
 import java.net.ConnectException;
@@ -30,8 +28,6 @@ public class GameClient {
     private GameClientController gameController;
     private SceneController sceneController;
     private final List<BoardUpdateListener> listeners = new ArrayList<>();
-    private Timeline dragScheduler;
-
 
     public void addBoardUpdateListener(BoardUpdateListener listener) {
         listeners.add(listener);
@@ -65,18 +61,6 @@ public class GameClient {
             e.printStackTrace();
         }
         return false;
-    }
-
-    /**
-     * Creates a Timeline to send drag updates
-     * @param data
-     * @return
-     */
-    private Timeline createDragScheduler (MouseData data) {
-        KeyFrame keyFrame = new KeyFrame(Duration.millis(100), event -> {
-            send(new Message(MessageType.MOUSE_ACTION, data));
-        });
-        return new Timeline(keyFrame);
     }
 
     /**
@@ -133,24 +117,8 @@ public class GameClient {
         double y = absoluteY % Square.HEIGHT;
 
         MouseData data = new MouseData(row, col, x, y, action);
-
-        // For dragging, send updates periodically using TimeLine
-        if (action == MouseAction.DRAG) {
-            if (dragScheduler == null || dragScheduler.getStatus() == Timeline.Status.STOPPED) {
-                dragScheduler = createDragScheduler(data);
-                dragScheduler.play();
-            }
-        } else {
-            if (action == MouseAction.RELEASE) {
-                // Stop drag updates when mouse is released
-                if (dragScheduler != null) {
-                    dragScheduler.stop();
-                }
-            }
-            send(new Message(MessageType.MOUSE_ACTION, data));
-        }
-
-
+        data.setPlayer(localPlayer);
+        send(new Message(MessageType.MOUSE_ACTION, data));
     }
 
 
@@ -222,6 +190,11 @@ public class GameClient {
                 System.out.println("❌ Name rejected by server.");
             }
 
+            case PLAYER_COLOR_CHANGED -> {
+                Player player = (Player) message.getData();
+                localPlayer.setColorHex(player.getColorHex());
+            }
+
             case ROOM_LIST_UPDATE -> {
                 List<GameRoomDTO> rooms = (List<GameRoomDTO>) message.getData();
                 System.out.println("📄 Room list received: " + rooms.size() + " rooms");
@@ -287,7 +260,4 @@ public class GameClient {
             e.printStackTrace();
         }
     }
-
-
-
 }

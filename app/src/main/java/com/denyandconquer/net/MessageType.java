@@ -10,7 +10,7 @@ public enum MessageType implements Serializable {
     PLAYER_NAME_SET_REQUEST, // Client sets player name
     PLAYER_NAME_ACCEPTED, // Server accepts player name
     PLAYER_NAME_REJECTED, // Server rejects player name
-
+    PLAYER_COLOR_CHANGED, // Server changes player color
     // Lobby actions
     CREATE_ROOM_REQUEST, // Client requests to create a room
     ROOM_CREATED, // Server creates a room

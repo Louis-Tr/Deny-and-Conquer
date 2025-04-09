@@ -44,8 +44,17 @@ public class Player implements Serializable {
         return name;
     }
 
+    public String getColorHex() {
+        return colorHex;
+    }
+
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setColorHex(String hex) {
+        this.colorHex = hex;
+        this.color = Color.web(hex);
     }
 
     public int getScore() {
@@ -69,4 +78,22 @@ public class Player implements Serializable {
     public String toString() {
         return name;
     }
+
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        Player other = (Player) obj;
+        return name != null && colorHex != null &&
+                name.equals(other.name) && colorHex.equals(other.colorHex);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (colorHex != null ? colorHex.hashCode() : 0);
+        return result;
+    }
+
+
 }

@@ -13,6 +13,7 @@ public class MouseData implements Serializable {
     private final double y;
     private final MouseAction action;
     private Player player;
+    private boolean filled;
 
     public MouseData(int row, int col, double x, double y, MouseAction action) {
         this.row = row;
@@ -48,5 +49,13 @@ public class MouseData implements Serializable {
 
     public Player getPlayer() {
         return player;
+    }
+
+    public boolean isFilled() {
+        return filled;
+    }
+
+    public void setFilled(boolean filled) {
+        this.filled = filled;
     }
 }
