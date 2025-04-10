@@ -151,6 +151,11 @@ public class SceneController {
         menuScene.showErrorDialog();
     }
 
+    public void handleGameOver(Player winner) {
+        showGameRoom();
+        gameRoomScene.showWinnerDialog(winner);
+    }
+
     public Launcher getLauncher() {
         return launcher;
     }

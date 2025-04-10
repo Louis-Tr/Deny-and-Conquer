@@ -48,6 +48,9 @@ public class MenuScene {
         return scene;
     }
 
+    /**
+     * Display error message.
+     */
     public void showErrorDialog() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Connection Error");

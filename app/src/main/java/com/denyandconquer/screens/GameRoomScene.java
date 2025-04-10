@@ -74,5 +74,13 @@ public class GameRoomScene {
         });
     }
 
+    public void showWinnerDialog(Player winner) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Game Over");
+        alert.setHeaderText("The game is over!");
+        alert.setContentText("The winner is: " + winner.getName());
+        alert.showAndWait();
+    }
+
 
 }

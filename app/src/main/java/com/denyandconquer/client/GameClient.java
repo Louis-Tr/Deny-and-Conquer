@@ -223,6 +223,13 @@ public class GameClient {
                 });
             }
 
+            case GAME_OVER -> {
+                Player winner = (Player) message.getData();
+                Platform.runLater(() -> {
+                    sceneController.handleGameOver(winner);
+                });
+            }
+
             case MOUSE_ACTION -> {
                 MouseData data = (MouseData) message.getData();
                 System.out.println("🖱️ Mouse action: " + data.getAction() + " at (" + data.getX() + ", " + data.getY() + ") by " + data.getPlayer().getName());
