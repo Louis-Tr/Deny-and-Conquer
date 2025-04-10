@@ -76,11 +76,16 @@ public class GameServer {
                 System.out.println("🟢 Client connected: " + socket.getRemoteSocketAddress());
 
                 while (true) {
-                    Message message = (Message) in.readObject();
-                    System.out.println("📩 Received: " + message.getType());
-                    System.out.println("[Server Received]Message class loaded from: " + Message.class.getProtectionDomain().getCodeSource());
-
-                    handleMessage(message);
+                    try {
+                        Object obj = in.readObject();
+                        System.out.println("[Server]Raw object received: " + obj.getClass());
+                        Message message = (Message) obj;
+                        System.out.println("📩 Received: " + message.getType());
+                        handleMessage(message);
+                    } catch (ClassCastException cce) {
+                        System.out.println("❌ ClassCastException: " + cce.getMessage());
+                        cce.printStackTrace();
+                    }
                 }
             } catch (EOFException eofe) {
                 System.out.println("🔴 Client disconnected (EOF) from: " + socket.getRemoteSocketAddress());
@@ -200,8 +205,6 @@ public class GameServer {
                 if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE) {
                     out.reset();
                 }
-                System.out.println("[Server Sent]Message class loaded from: " + Message.class.getProtectionDomain().getCodeSource());
-
                 out.writeObject(message);
                 out.flush();
                 System.out.println("📤 Sent: " + message.getType());

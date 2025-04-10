@@ -128,8 +128,6 @@ public class GameClient {
     private synchronized void send(Message message) {
         try {
             if (out != null) {
-                System.out.println("[Client Send]Message class loaded from: " + Message.class.getProtectionDomain().getCodeSource());
-
                 out.writeObject(message);
                 out.flush();
             }
@@ -159,10 +157,14 @@ public class GameClient {
         new Thread(() -> {
             try {
                 while (true) {
-                    Message message = (Message) in.readObject();
-                    System.out.println("[Client Receive] Message class loaded from: " + Message.class.getProtectionDomain().getCodeSource());
-
-                    handleServerMessage(message);
+                    try {
+                        Object obj = in.readObject();
+                        Message message = (Message) obj;
+                        handleServerMessage(message);
+                    } catch (ClassCastException cce) {
+                        System.out.println("❌ ClassCastException: " + cce.getMessage());
+                        cce.printStackTrace();
+                    }
                 }
             } catch (EOFException efo) {
                 System.out.println("🔴 Server closed the connection.");
