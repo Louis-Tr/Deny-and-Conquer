@@ -128,6 +128,8 @@ public class GameClient {
     private synchronized void send(Message message) {
         try {
             if (out != null) {
+                System.out.println("[Client Send]Message class loaded from: " + Message.class.getProtectionDomain().getCodeSource());
+
                 out.writeObject(message);
                 out.flush();
             }
@@ -158,6 +160,8 @@ public class GameClient {
             try {
                 while (true) {
                     Message message = (Message) in.readObject();
+                    System.out.println("[Client Receive] Message class loaded from: " + Message.class.getProtectionDomain().getCodeSource());
+
                     handleServerMessage(message);
                 }
             } catch (EOFException efo) {
@@ -165,6 +169,7 @@ public class GameClient {
             } catch (SocketException se){
                 System.out.println("🔴 Connection error: " + se.getMessage());
             }catch (Exception e) {
+                System.out.println("🔴 Unexpected error in startListening: " + e.getMessage());
                 e.printStackTrace();
             } finally {
                 disconnect();
@@ -258,7 +263,7 @@ public class GameClient {
 
             System.out.println("🔴 Disconnected from server.");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("❌ Error closing socket: " + e.getMessage());
         }
     }
 

@@ -78,10 +78,12 @@ public class GameServer {
                 while (true) {
                     Message message = (Message) in.readObject();
                     System.out.println("📩 Received: " + message.getType());
+                    System.out.println("[Server Received]Message class loaded from: " + Message.class.getProtectionDomain().getCodeSource());
+
                     handleMessage(message);
                 }
             } catch (EOFException eofe) {
-                System.out.println("🔴 Client disconnected unexpectedly: " + eofe.getMessage());
+                System.out.println("🔴 Client disconnected (EOF) from: " + socket.getRemoteSocketAddress());
             } catch (Exception e) {
                 System.out.println("🔴 Client handler crashed: " + e.getMessage());
             } finally {
@@ -198,6 +200,8 @@ public class GameServer {
                 if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE) {
                     out.reset();
                 }
+                System.out.println("[Server Sent]Message class loaded from: " + Message.class.getProtectionDomain().getCodeSource());
+
                 out.writeObject(message);
                 out.flush();
                 System.out.println("📤 Sent: " + message.getType());

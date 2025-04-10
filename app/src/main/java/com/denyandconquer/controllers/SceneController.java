@@ -174,10 +174,8 @@ public class SceneController {
 
     public void startGame() {
         System.out.println("Starting Game");
-        if (gameScene == null) {
-            gameScene = new GameScene(this);
-            launcher.getClient().addBoardUpdateListener(gameScene);
-        }
+        gameScene = new GameScene(this);
+        launcher.getClient().addBoardUpdateListener(gameScene);
         stage.setScene(gameScene.getScene());
     }
 
