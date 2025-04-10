@@ -157,13 +157,11 @@ public class GameClient {
         new Thread(() -> {
             try {
                 while (true) {
-                    try {
-                        Object obj = in.readObject();
-                        Message message = (Message) obj;
+                    Object obj = in.readObject();
+                    if (obj instanceof Message message) {
                         handleServerMessage(message);
-                    } catch (ClassCastException cce) {
-                        System.out.println("❌ ClassCastException: " + cce.getMessage());
-                        cce.printStackTrace();
+                    } else {
+                        System.out.println("❌ Invalid object received:" + obj.getClass());
                     }
                 }
             } catch (EOFException efo) {
@@ -226,6 +224,7 @@ public class GameClient {
                 sceneController.createGameController(this, new Board(), players, localPlayer);
                 Platform.runLater(() -> {
                     this.gameController = sceneController.getGameController();
+                    localPlayer.resetScore();
                     sceneController.startGame();
                 });
             }
