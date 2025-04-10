@@ -1,11 +1,9 @@
 package com.denyandconquer.net;
 
-import java.io.Serializable;
-
 /**
  * Enum of all possible message types exchanged between client and server.
  */
-public enum MessageType implements Serializable {
+public enum MessageType {
     // Menu actions
     PLAYER_NAME_SET_REQUEST, // Client sets player name
     PLAYER_NAME_ACCEPTED, // Server accepts player name

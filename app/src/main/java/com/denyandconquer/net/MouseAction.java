@@ -1,8 +1,6 @@
 package com.denyandconquer.net;
 
-import java.io.Serializable;
-
-public enum MouseAction implements Serializable {
+public enum MouseAction {
     PRESS,
     DRAG,
     RELEASE
