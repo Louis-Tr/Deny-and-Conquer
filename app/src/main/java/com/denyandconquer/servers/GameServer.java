@@ -63,6 +63,7 @@ public class GameServer {
         private ObjectOutputStream out;
         private Player player;
         private GameRoom currentRoom;
+        volatile boolean isDisconnected = false;
 
         public ClientHandler(Socket socket) {
             this.socket = socket;
@@ -75,7 +76,7 @@ public class GameServer {
                 in = new ObjectInputStream(socket.getInputStream());
                 System.out.println("🟢 Client connected: " + socket.getRemoteSocketAddress());
 
-                while (true) {
+                while (!isDisconnected) {
                     try {
                         Object obj = in.readObject();
                         System.out.println("[Server]Raw object received: " + obj.getClass());
@@ -206,18 +207,16 @@ public class GameServer {
         }
 
         private void send(Message message) {
+            if (isDisconnected) return;
+
             try {
-                if (isAlive()) {
-                    if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE ||
-                            message.getType() == MessageType.START_GAME) {
-                        out.reset();
-                    }
-                    out.writeObject(message);
-                    out.flush();
-                    System.out.println("📤 Sent: " + message.getType());
-                } else {
-                    System.out.println("⚠ Tried to send to a disconnected client: " + socket);
+                if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE ||
+                        message.getType() == MessageType.START_GAME) {
+                    out.reset();
                 }
+                out.writeObject(message);
+                out.flush();
+                System.out.println("📤 Sent: " + message.getType());
 
             } catch (IOException e) {
                 System.out.println("❌ [Server] Cannot send message: " + e.getMessage());
@@ -287,6 +286,9 @@ public class GameServer {
         }
 
         private void disconnect() {
+            if (isDisconnected) return;
+            isDisconnected = true;
+
             try {
                 synchronized (clientHandlers) {
                     clientHandlers.remove(socket);
