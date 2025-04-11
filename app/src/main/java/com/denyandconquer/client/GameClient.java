@@ -171,7 +171,9 @@ public class GameClient {
                 System.out.println("🔴 Server closed the connection.");
             } catch (SocketException se){
                 System.out.println("🔴 Connection error: " + se.getMessage());
-            }catch (Exception e) {
+            }catch (StreamCorruptedException sce) {
+                System.out.println("🔴 Stream corrupted: " + sce.getMessage());
+            } catch (Exception e) {
                 System.out.println("🔴 Unexpected error in startListening: " + e.getMessage());
                 e.printStackTrace();
             } finally {
