@@ -27,6 +27,7 @@ public class GameClient {
     private GameClientController gameController;
     private SceneController sceneController;
     private final List<BoardUpdateListener> listeners = new ArrayList<>();
+    volatile boolean isDisconnected = false;
 
 
     public void addBoardUpdateListener(BoardUpdateListener listener) {
@@ -126,6 +127,8 @@ public class GameClient {
      * Internal send method (synchronized).
      */
     private synchronized void send(Message message) {
+        if (isDisconnected) return;
+
         try {
             if (out != null) {
                 out.writeObject(message);
@@ -156,7 +159,7 @@ public class GameClient {
     private void startListening() {
         new Thread(() -> {
             try {
-                while (true) {
+                while (!isDisconnected) {
                     Object obj = in.readObject();
                     if (obj instanceof Message message) {
                         handleServerMessage(message);
@@ -260,6 +263,9 @@ public class GameClient {
     }
 
     public void disconnect() {
+        if (isDisconnected) return;
+        isDisconnected = true;
+
         try {
             if (socket != null && !socket.isClosed()) socket.close();
             if (in != null) in.close();
