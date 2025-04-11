@@ -225,6 +225,9 @@ public class GameClient {
                 Platform.runLater(() -> {
                     this.gameController = sceneController.getGameController();
                     localPlayer.resetScore();
+                    for (BoardUpdateListener listener : listeners) {
+                        listener.onSquareUpdated(null);
+                    }
                     sceneController.startGame();
                 });
             }

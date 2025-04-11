@@ -161,6 +161,7 @@ public class GameServer {
                     if (currentRoom != null) {
                         System.out.println("🚪 LEAVE_ROOM: " + currentRoom.getRoomName());
                         currentRoom.removePlayer(player);
+                        sendRoomPlayerList(currentRoom);
                         currentRoom = null;
                         broadcastRoomList();
                     }
@@ -170,9 +171,13 @@ public class GameServer {
                     String roomId = (String) message.getData();
                     System.out.println("▶️ START_GAME: " + roomId);
                     GameRoom room = lobbyManager.getRoom(roomId);
+                    List <Player> players = room.getPlayerList();
+                    for (Player player : players) {
+                        player.resetScore();
+                    }
                     if (room != null && room.equals(currentRoom)) {
                         room.startGame();
-                        broadcastToRoom(room, new Message(MessageType.START_GAME, room.getPlayerList()));
+                        broadcastToRoom(room, new Message(MessageType.START_GAME, players));
                     }
                 }
 
@@ -204,7 +209,8 @@ public class GameServer {
 
         private void send(Message message) {
             try {
-                if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE) {
+                if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE ||
+                        message.getType() == MessageType.START_GAME) {
                     out.reset();
                 }
                 out.writeObject(message);
