@@ -161,7 +161,7 @@ public class GameClient {
             try {
                 while (!isDisconnected) {
                     Object obj = in.readObject();
-                    if (obj instanceof Message message) {
+                    if (obj instanceof Message message && message.getType() instanceof MessageType) {
                         handleServerMessage(message);
                     } else {
                         System.out.println("❌ Invalid object received:" + obj.getClass());
