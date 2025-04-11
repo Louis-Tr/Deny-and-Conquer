@@ -9,8 +9,8 @@ public class Square {
 
     public static final int WIDTH = 50;
     public static final int HEIGHT = 50;
-    private static final double FILL_THRESHOLD = 0.3;
-    private static final int BRUSH_SIZE = 20;
+    private static final double FILL_THRESHOLD = 0.5;
+    private static final int BRUSH_SIZE = 10;
 
     private final int row;
     private final int col;
