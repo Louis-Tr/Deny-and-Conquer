@@ -207,13 +207,18 @@ public class GameServer {
 
         private void send(Message message) {
             try {
-                if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE ||
-                        message.getType() == MessageType.START_GAME) {
-                    out.reset();
+                if (isAlive()) {
+                    if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE ||
+                            message.getType() == MessageType.START_GAME) {
+                        out.reset();
+                    }
+                    out.writeObject(message);
+                    out.flush();
+                    System.out.println("📤 Sent: " + message.getType());
+                } else {
+                    System.out.println("⚠ Tried to send to a disconnected client: " + socket);
                 }
-                out.writeObject(message);
-                out.flush();
-                System.out.println("📤 Sent: " + message.getType());
+
             } catch (IOException e) {
                 System.out.println("❌ [Server] Cannot send message: " + e.getMessage());
                 e.printStackTrace();
@@ -275,6 +280,10 @@ public class GameServer {
                     handler.send(message);
                 }
             }
+        }
+
+        public boolean isAlive() {
+            return socket !=null && !socket.isClosed() && socket.isConnected();
         }
 
         private void disconnect() {
