@@ -6,6 +6,7 @@ import com.denyandconquer.common.Square;
 import com.denyandconquer.net.MouseData;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,7 +21,7 @@ public class GameController {
     public GameController(List<Player> players) {
         System.out.println("GameController initialized");
         this.board = new Board();
-        this.players = players;
+        this.players = new ArrayList<>(players);
     }
 
     /** @return The full game board. */
@@ -62,11 +63,14 @@ public class GameController {
 
 
     public void updatePlayerList(List<Player> playerList) {
-        for (Player player : playerList) {
-            if (!players.contains(player)) {
-                players.add(player);
-            }
-        }
+        players.clear();
+        players.addAll(new ArrayList<>(playerList));
+
+//        for (Player player : playerList) {
+//            if (!players.contains(player)) {
+//                players.add(player);
+//            }
+//        }
     }
 
     public boolean winnerCheck() {
@@ -112,6 +116,7 @@ public class GameController {
 
     public void startGame() {
         // Initialize game state, shuffle tiles, etc.
+        System.out.println("Reset Game...");
         for (Player player : players) {
             player.resetScore();
         }

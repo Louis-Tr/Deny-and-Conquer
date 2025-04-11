@@ -29,14 +29,18 @@ public class GameRoom implements Serializable {
         this.gameController = new GameController(playerList);
     }
 
-    private Color getUniqueColor() {
+    private Color getUniqueColor(int index) {
         // Use distinct hues based on current number of players
-        int index = playerList.size();
         double hue = (index * 360.0 / maxPlayers) % 360;
         return Color.hsb(hue, 0.9, 0.9); // Bright, saturated color
     }
 
-
+    private void assignColors() {
+        for (int i = 0; i < playerList.size(); i++) {
+            Player player = playerList.get(i);
+            player.setColor(getUniqueColor(i)); // Assign unique color before adding
+        }
+    }
 
     public String getRoomId() {
         return roomId;
@@ -72,8 +76,6 @@ public class GameRoom implements Serializable {
 
     public boolean addPlayer(Player player) {
         if (isFull() || playerList.contains(player) || gameStarted) return false;
-
-        player.setColor(getUniqueColor()); // Assign unique color before adding
         return playerList.add(player);
     }
 
@@ -95,10 +97,15 @@ public class GameRoom implements Serializable {
 
     public void startGame() {
         if (!gameStarted && playerList.size() >= 2) {
+            assignColors();
             this.gameStarted = true;
             this.gameController.updatePlayerList(playerList);
             gameController.startGame();
         }
+    }
+
+    public void endGame() {
+        gameStarted = false;
     }
 
     public String getPassword() {

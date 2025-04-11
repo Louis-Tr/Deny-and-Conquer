@@ -171,13 +171,10 @@ public class GameServer {
                     String roomId = (String) message.getData();
                     System.out.println("▶️ START_GAME: " + roomId);
                     GameRoom room = lobbyManager.getRoom(roomId);
-                    List <Player> players = room.getPlayerList();
-                    for (Player player : players) {
-                        player.resetScore();
-                    }
+
                     if (room != null && room.equals(currentRoom)) {
                         room.startGame();
-                        broadcastToRoom(room, new Message(MessageType.START_GAME, players));
+                        broadcastToRoom(room, new Message(MessageType.START_GAME, room.getPlayerList()));
                     }
                 }
 
@@ -192,6 +189,7 @@ public class GameServer {
                     if (data.getAction() == MouseAction.RELEASE) {
                         Player winner = currentRoom.getGameController().getWinner();
                         if (winner != null) {
+                            currentRoom.endGame();
                             broadcastToRoom(currentRoom, new Message(MessageType.GAME_OVER, winner));
                         }
                     }
