@@ -264,6 +264,10 @@ public class GameClient {
         }
     }
 
+    /**
+     * Disconnects from the game server.
+     * Closes socket and streams.
+     */
     public void disconnect() {
         if (isDisconnected) return;
         isDisconnected = true;
