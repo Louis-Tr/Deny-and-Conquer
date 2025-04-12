@@ -121,8 +121,6 @@ public class GameClient {
         send(new Message(MessageType.MOUSE_ACTION, data));
     }
 
-
-
     /**
      * Internal send method (synchronized).
      */
@@ -222,7 +220,6 @@ public class GameClient {
                 Platform.runLater(() -> sceneController.updateRoom(players));
             }
 
-
             case START_GAME -> {
                 List<Player> players = (List<Player>) message.getData();
                 System.out.println("🎮 Game starting with " + players.size() + " players.");
@@ -269,6 +266,10 @@ public class GameClient {
         }
     }
 
+    /**
+     * Disconnects from the game server.
+     * Closes socket and streams.
+     */
     public void disconnect() {
         if (isDisconnected) return;
         isDisconnected = true;
