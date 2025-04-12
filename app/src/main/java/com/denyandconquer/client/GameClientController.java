@@ -6,6 +6,7 @@ import com.denyandconquer.common.Square;
 import com.denyandconquer.net.MouseData;
 import javafx.scene.input.MouseEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ import java.util.List;
 public class GameClientController {
     private final GameClient client;
     private final Board board;
-    private final List<Player> players;
+    private List<Player> players;
     private final Player localPlayer;
 
     public GameClientController(GameClient client, Board board, List<Player> players, Player localPlayer) {
@@ -33,8 +34,7 @@ public class GameClientController {
     }
 
     public void updatePlayerList(List<Player> players) {
-        this.players.clear();
-        this.players.addAll(players);
+        this.players = new ArrayList<>(players);
     }
 
     public void mouseAction(MouseEvent e) {

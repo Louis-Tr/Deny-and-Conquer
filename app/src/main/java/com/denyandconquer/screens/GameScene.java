@@ -100,7 +100,7 @@ public class GameScene extends Scene implements BoardUpdateListener {
     }
 
     @Override
-    public void onSquareUpdated(Square square) {
+    public void onSquareUpdated() {
         Platform.runLater(this::updatePlayerPanel);
     }
 

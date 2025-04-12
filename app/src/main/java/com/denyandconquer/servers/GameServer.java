@@ -188,6 +188,8 @@ public class GameServer {
                         broadcastToRoom(currentRoom, new Message(MessageType.MOUSE_ACTION, data));
                     }
                     if (data.getAction() == MouseAction.RELEASE) {
+                        List<Player> players = currentRoom.getPlayerList();
+                        broadcastToRoom(currentRoom, new Message(MessageType.SCORE_UPDATE, players));
                         Player winner = currentRoom.getGameController().getWinner();
                         if (winner != null) {
                             currentRoom.endGame();
@@ -210,10 +212,19 @@ public class GameServer {
             if (isDisconnected) return;
 
             try {
-                if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE ||
-                        message.getType() == MessageType.START_GAME) {
+                MessageType type = message.getType();
+                if (type == MessageType.MOUSE_ACTION) {
+                    MouseData data = (MouseData) message.getData();
+                    if (data.getAction() == MouseAction.PRESS) {
+                        out.reset();
+                    }
+                } else {
                     out.reset();
                 }
+//                if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE ||
+//                        message.getType() == MessageType.START_GAME) {
+//                    out.reset();
+//                }
                 out.writeObject(message);
                 out.flush();
                 System.out.println("📤 Sent: " + message.getType());

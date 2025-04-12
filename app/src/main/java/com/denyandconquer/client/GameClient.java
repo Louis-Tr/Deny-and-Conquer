@@ -231,7 +231,7 @@ public class GameClient {
                     this.gameController = sceneController.getGameController();
                     localPlayer.resetScore();
                     for (BoardUpdateListener listener : listeners) {
-                        listener.onSquareUpdated(null);
+                        listener.onSquareUpdated();
                     }
                     sceneController.startGame();
                 });
@@ -244,6 +244,14 @@ public class GameClient {
                 });
             }
 
+            case SCORE_UPDATE -> {
+                List<Player> players = (List<Player>) message.getData();
+                gameController.updatePlayerList(players);
+                for (BoardUpdateListener listener : listeners) {
+                    listener.onSquareUpdated();
+                }
+            }
+
             case MOUSE_ACTION -> {
                 MouseData data = (MouseData) message.getData();
                 System.out.println("🖱️ Mouse action: " + data.getAction() + " at (" + data.getX() + ", " + data.getY() + ") by " + data.getPlayer().getName());
@@ -252,9 +260,6 @@ public class GameClient {
                 if (change) {
                     Square updated = gameController.getBoard().getSquare(data.getX(), data.getY());
                     System.out.println("✅ [UI] Square updated at: (" + data.getX() + ", " + data.getY() + ")");
-                    for (BoardUpdateListener listener : listeners) {
-                        listener.onSquareUpdated(updated);
-                    }
                 }
             }
 

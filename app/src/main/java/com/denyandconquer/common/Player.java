@@ -56,6 +56,9 @@ public class Player implements Serializable {
         score++;
     }
 
+    public void setScore(Integer score) {
+        this.score = score;
+    }
     public void resetScore() {
         this.score = 0;
     }
