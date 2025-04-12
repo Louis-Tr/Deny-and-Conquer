@@ -9,6 +9,10 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 
+/**
+ * The GameServer connects with incoming client,
+ * and creating new thread for each connected client.
+ */
 public class GameServer {
     private final int port;
     private final LobbyManager lobbyManager = new LobbyManager();
@@ -20,13 +24,18 @@ public class GameServer {
         this.port = port;
     }
 
+    /**
+     * Starts the server on the port given by the user.
+     * Listens for client connections,
+     * and it starts a new thread to handle the client communication
+     */
     public void start() {
         try {
             serverSocket = new ServerSocket(port);
             isStarted = true;
             System.out.println("GameServer started on port " + port);
 
-            while (true) {
+            while (isStarted) {
                 Socket clientSocket = serverSocket.accept();
                 ClientHandler handler = new ClientHandler(clientSocket);
                 clientHandlers.put(clientSocket, handler);
@@ -42,21 +51,41 @@ public class GameServer {
 
     }
 
+    /**
+     * Stops the server by stopping all threads,
+     * and closing the server socket.
+     */
     public void stop() {
+        if (!isStarted) return;
+        isStarted = false;
+
+        // Clear all game threads
+        synchronized (clientHandlers) {
+            List<ClientHandler> players = new ArrayList<>(clientHandlers.values());
+            for (ClientHandler player : players) {
+                player.disconnect();
+            }
+            clientHandlers.clear();
+        }
+
         try {
             if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();
-                System.out.println("🔴 Server stopped.");
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("🔴 Server stopped.");
     }
 
     public boolean isStarted() {
         return isStarted;
     }
 
+    /**
+     * The Clienthandler handles communication between
+     * the server and an individual client.
+     */
     private class ClientHandler implements Runnable {
         private final Socket socket;
         private ObjectInputStream in;
@@ -69,6 +98,9 @@ public class GameServer {
             this.socket = socket;
         }
 
+        /**
+         * Handles communication with a single connected client.
+         */
         @Override
         public void run() {
             try {
@@ -97,6 +129,11 @@ public class GameServer {
             }
         }
 
+        /**
+         * Processes a received message from the client
+         * @param message the message received from the client.
+         * @throws IOException
+         */
         private void handleMessage(Message message) throws IOException {
             switch (message.getType()) {
                 case JOIN_SERVER -> {
@@ -202,12 +239,20 @@ public class GameServer {
             }
         }
 
+        /**
+         * Sends a message to all connected clients
+         * @param message the message to send.
+         */
         private void broadcastToAll(Message message) {
             for (ClientHandler handler : clientHandlers.values()) {
                 handler.send(message);
             }
         }
 
+        /**
+         * Sends a message to this client.
+         * @param message the message to send.
+         */
         private void send(Message message) {
             if (isDisconnected) return;
 
@@ -221,10 +266,7 @@ public class GameServer {
                 } else {
                     out.reset();
                 }
-//                if (message.getType() == MessageType.PLAYER_ROOM_LIST_UPDATE ||
-//                        message.getType() == MessageType.START_GAME) {
-//                    out.reset();
-//                }
+
                 out.writeObject(message);
                 out.flush();
                 System.out.println("📤 Sent: " + message.getType());
@@ -236,6 +278,10 @@ public class GameServer {
             }
         }
 
+        /**
+         * Sends an updated player list to all clients in a specific game room.
+         * @param room the room whose player list should be sent.
+         */
         private void sendRoomPlayerList(GameRoom room) {
             List<Player> players = room.getPlayerList();
             Message message = new Message(MessageType.PLAYER_ROOM_LIST_UPDATE, players);
@@ -247,6 +293,9 @@ public class GameServer {
             }
         }
 
+        /**
+         * Sends the current list of all connected players to each client.
+         */
         private void broadCastServerPlayerList() {
             List<Player> players = new ArrayList<>();
             for (ClientHandler handler : clientHandlers.values()) {
@@ -262,6 +311,10 @@ public class GameServer {
             }
         }
 
+        /**
+         * Sends the list of all available game rooms to a specific client.
+         * @param handler the client handler to send the list to.
+         */
         private void sendRoomList(ClientHandler handler) {
             List<GameRoomDTO> dtoList = lobbyManager.getAllRooms()
                     .stream()
@@ -270,6 +323,9 @@ public class GameServer {
             handler.send(new Message(MessageType.ROOM_LIST_UPDATE, dtoList));
         }
 
+        /**
+         * Broadcasts the list of all available game rooms to all connected clients.
+         */
         private void broadcastRoomList() {
             List<GameRoomDTO> dtoList = lobbyManager.getAllRooms()
                     .stream()
@@ -283,7 +339,11 @@ public class GameServer {
             }
         }
 
-
+        /**
+         * Broadcasts a message to all clients in a specific game room.
+         * @param room the room to broadcast to.
+         * @param message the message to send.
+         */
         private void broadcastToRoom(GameRoom room, Message message) {
             for (ClientHandler handler : clientHandlers.values()) {
                 if (handler.currentRoom != null && handler.currentRoom.equals(room)) {
@@ -292,10 +352,11 @@ public class GameServer {
             }
         }
 
-        public boolean isAlive() {
-            return socket !=null && !socket.isClosed() && socket.isConnected();
-        }
-
+        /**
+         * Handles client disconnection and cleanup.
+         * Removes the player from the lobby and room,
+         * and closes sockets and streams.
+         */
         private void disconnect() {
             if (isDisconnected) return;
             isDisconnected = true;
