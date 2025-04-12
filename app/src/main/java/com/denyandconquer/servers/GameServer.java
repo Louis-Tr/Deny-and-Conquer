@@ -221,8 +221,14 @@ public class GameServer {
                     boolean changed = currentRoom.getGameController().handleMouseAction(player, data);
                     System.out.println("🖱️ MOUSE_ACTION by " + player.getName() + ": " + data.getAction());
                     if (changed) {
-                        data.setPlayer(player);
-                        broadcastToRoom(currentRoom, new Message(MessageType.MOUSE_ACTION, data));
+                        MouseData copyData = new MouseData(
+                                data.getRow(),
+                                data.getCol(),
+                                data.getX(),
+                                data.getY(),
+                                data.getAction());
+                        copyData.setPlayer(player);
+                        broadcastToRoom(currentRoom, new Message(MessageType.MOUSE_ACTION, copyData));
                     }
                     if (data.getAction() == MouseAction.RELEASE) {
                         List<Player> players = currentRoom.getPlayerList();
@@ -258,15 +264,18 @@ public class GameServer {
 
             try {
                 MessageType type = message.getType();
-                if (type == MessageType.MOUSE_ACTION) {
-                    MouseData data = (MouseData) message.getData();
-                    if (data.getAction() == MouseAction.PRESS) {
-                        out.reset();
-                    }
-                } else {
+//                if (type == MessageType.MOUSE_ACTION) {
+//                    MouseData data = (MouseData) message.getData();
+//                    if (data.getAction() == MouseAction.PRESS) {
+//                        out.reset();
+//                    }
+//                } else {
+//                    out.reset();
+//                }
+                if (type == MessageType.PLAYER_ROOM_LIST_UPDATE ||
+                        type == MessageType.START_GAME) {
                     out.reset();
                 }
-
                 out.writeObject(message);
                 out.flush();
                 System.out.println("📤 Sent: " + message.getType());
